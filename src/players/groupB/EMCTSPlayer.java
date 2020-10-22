@@ -1,25 +1,30 @@
 package players.groupB;
+
 import core.GameState;
 import players.Player;
 import players.optimisers.ParameterizedPlayer;
 import utils.Types;
 
 import java.util.Random;
-TestPlayer
-public class  extends ParameterizedPlayer {
 
+public class EMCTSPlayer extends ParameterizedPlayer {
 
-    protected TestPlayer(long seed, int pId) {
+    /**
+     * Random generator.
+     */
+    private Random m_rnd;
+
+    /**
+     * All actions available.
+     */
+    public Types.ACTIONS[] actions;
+
+    protected EMCTSPlayer(long seed, int pId) {
         super(seed, pId);
     }
 
     @Override
-    public void reset(long l, int i) {
-
-    }
-
-    @Override
-    public Types.ACTIONS act(GameState gameState) {
+    public Types.ACTIONS act(GameState gs) {
         return null;
     }
 
