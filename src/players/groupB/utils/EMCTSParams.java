@@ -6,6 +6,7 @@ import utils.Pair;
 import java.util.ArrayList;
 import java.util.Map;
 
+import static players.rhea.utils.Constants.CUSTOM_HEURISTIC;
 
 public class EMCTSParams implements ParameterSet {
 
@@ -13,7 +14,7 @@ public class EMCTSParams implements ParameterSet {
     private int individual_length = 12;
     private int iteration_budget = 200;
     private double mutation_rate = 0.5;
-    private int heuristic_method = 2;
+    private int heuristic_method = CUSTOM_HEURISTIC;
     private int tree_depth = 8;
 
     //
@@ -52,6 +53,7 @@ public class EMCTSParams implements ParameterSet {
     }
 
     public int getHeuristic_method() {
+
         return heuristic_method;
     }
 
