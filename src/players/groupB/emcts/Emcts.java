@@ -4,6 +4,7 @@ import core.GameState;
 import players.groupB.interfaces.GamePlayable;
 import players.groupB.utils.EMCTSParams;
 import players.heuristics.*;
+import players.mcts.SingleTreeNode;
 import players.rhea.utils.FMBudget;
 import utils.ElapsedCpuTimer;
 import utils.Types;
@@ -18,6 +19,7 @@ import static players.rhea.utils.Constants.WIN_SCORE_HEURISTIC;
 
 public class Emcts implements GamePlayable {
 
+    private Emcts[] children;
     private EMCTSParams params;
     private Random randomGenerator;
     private StateHeuristic stateHeuristic;
@@ -26,20 +28,17 @@ public class Emcts implements GamePlayable {
     public GameState rootState;
     private FMBudget fmBudget;
 
-    private HashMap<Integer, Types.ACTIONS> action_mapping;
-
     public Emcts(EMCTSParams params, Random randomGenerator) {
         this.params = params;
         this.randomGenerator = randomGenerator;
+        this.children = new Emcts[params.getAvailableActions().size()];
     }
 
     @Override
     public void setRootState(GameState gameState, ElapsedCpuTimer elapsedCpuTimer) {
-
         rootState = gameState;
         this.elapsedTimer = elapsedCpuTimer;
         fmBudget.reset();
-        getAvailableActions();
         switch (params.getHeuristic_method()) {
             case PLAYER_COUNT_HEURISTIC:
                 stateHeuristic = new PlayerCountHeuristic();
@@ -54,28 +53,25 @@ public class Emcts implements GamePlayable {
             case WIN_SCORE_HEURISTIC:
                 stateHeuristic = new WinScoreHeuristic();
                 break;
-
-
         }
     }
 
-        @Override
-        public void getActionToExecute () {
-
+    @Override
+    public void getActionToExecute() {
+        boolean stop = false;
+        while (!stop){
+            createRootStateSolution(rootState.copy());
+            EMCTS[] selected = treePolicy(state);
+            //EVaulaute Selected
+            backUp(selected, delta);
         }
-
-        @Override
-        public void getAvailableActions () {
-
-            ArrayList<Types.ACTIONS> availableActions = Types.ACTIONS.all();
-            int max_actions = availableActions.size();
-            action_mapping = new HashMap<>();
-            for (int i = 0; i < max_actions; i++) {
-                action_mapping.put(i, availableActions.get(i));
-            }
-            action_mapping.put(max_actions, Types.ACTIONS.ACTION_STOP);
-
-        }
-
     }
+
+    private void createRootStateSolution(GameState copy) {
+    }
+
+    private Emcts treePolicy(GameState state) {
+        return null;
+    }
+}
 

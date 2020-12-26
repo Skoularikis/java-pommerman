@@ -6,5 +6,4 @@ import utils.ElapsedCpuTimer;
 public interface GamePlayable {
     void setRootState(GameState gameState, ElapsedCpuTimer elapsedCpuTimer);
     void getActionToExecute();
-    void getAvailableActions();
 }

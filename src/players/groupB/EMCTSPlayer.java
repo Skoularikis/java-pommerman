@@ -57,6 +57,7 @@ public class EMCTSPlayer extends ParameterizedPlayer {
         }
         gamePlayable.setRootState(gs, elapsedTimer);
         gamePlayable.getActionToExecute();
+        return null;
     }
 
     @Override
