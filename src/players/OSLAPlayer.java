@@ -76,12 +76,13 @@ public class OSLAPlayer extends Player {
 
         for(int i = 0; i < nPlayers; ++i)
         {
-            if(i == getPlayerID() - Types.TILETYPE.AGENT0.getKey())
+            if(i == getPlayerID() - Types.TILETYPE.AGENT0.getKey()) // go left
             {
                 actionsAll[i] = act;
-            }else{
+            }
+            else{
                 if(rndOpponentModel){
-                    int actionIdx = random.nextInt(gs.nActions());
+                    int actionIdx = random.nextInt(gs.nActions()); //mcts -> right, rhea -> place a bomb, random player -> rugth
                     actionsAll[i] = Types.ACTIONS.all().get(actionIdx);
                 }else
                 {
