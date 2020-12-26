@@ -47,25 +47,23 @@ public class EMCTSPlayer extends ParameterizedPlayer {
     @Override
     public Types.ACTIONS act(GameState gs) {
         ElapsedCpuTimer elapsedTimer = null;
-        if (params.budget_type == TIME_BUDGET) {
+        if (params.getBudget_type() == TIME_BUDGET) {
             elapsedTimer = new ElapsedCpuTimer();
-            elapsedTimer.setMaxTimeMillis(params.time_budget);
+            elapsedTimer.setMaxTimeMillis(params.getTime_budget());
         }
-
-        return null;
+        gamePlayable.setRootState(gs, elapsedTimer);
+        gamePlayable.getActionToExecute();
     }
 
     @Override
     public int[] getMessage() {
-        return new int[0];
+        // default message
+        return new int[Types.MESSAGE_LENGTH];
     }
 
     @Override
     public Player copy() {
-        return null;
+        return new EMCTSPlayer(seed, playerID, params);
     }
 
-    private void setup(GameState rootState, ElapsedCpuTimer elapsedTimer) {
-//        gInterface.initTick(rootState, elapsedTimer);
-    }
 }
