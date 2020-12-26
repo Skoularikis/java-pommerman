@@ -2,8 +2,10 @@ package players.groupB.utils;
 
 import players.optimisers.ParameterSet;
 import utils.Pair;
+import utils.Types;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import static players.rhea.utils.Constants.CUSTOM_HEURISTIC;
@@ -16,6 +18,8 @@ public class EMCTSParams implements ParameterSet {
     private double mutation_rate = 0.5;
     private int heuristic_method = CUSTOM_HEURISTIC;
     private int tree_depth = 8;
+
+    private HashMap<Integer, Types.ACTIONS> action_mapping;
 
     //
     private int time_budget = 40;
@@ -110,6 +114,17 @@ public class EMCTSParams implements ParameterSet {
     public Map<String, String[]> constantNames() {
         return null;
     }
+    public HashMap<Integer, Types.ACTIONS> getAvailableActions () {
 
+        ArrayList<Types.ACTIONS> availableActions = Types.ACTIONS.all();
+        int max_actions = availableActions.size();
+        action_mapping = new HashMap<>();
+        for (int i = 0; i < max_actions; i++) {
+            action_mapping.put(i, availableActions.get(i));
+        }
+        action_mapping.put(max_actions, Types.ACTIONS.ACTION_STOP);
+
+        return action_mapping;
+    }
 
 }

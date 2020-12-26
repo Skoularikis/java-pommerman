@@ -20,7 +20,7 @@ public class EMCTSPlayer extends ParameterizedPlayer {
     private EMCTSParams params;
     private GamePlayable gamePlayable;
 
-    private HashMap<Integer, Types.ACTIONS> action_mapping;
+
 
     protected EMCTSPlayer(long seed, int pId) {
         super(seed, pId);
@@ -70,17 +70,6 @@ public class EMCTSPlayer extends ParameterizedPlayer {
         return new EMCTSPlayer(seed, playerID, params);
     }
 
-    public HashMap<Integer, Types.ACTIONS> getAvailableActions () {
 
-        ArrayList<Types.ACTIONS> availableActions = Types.ACTIONS.all();
-        int max_actions = availableActions.size();
-        action_mapping = new HashMap<>();
-        for (int i = 0; i < max_actions; i++) {
-            action_mapping.put(i, availableActions.get(i));
-        }
-        action_mapping.put(max_actions, Types.ACTIONS.ACTION_STOP);
-
-        return action_mapping;
-    }
 
 }
