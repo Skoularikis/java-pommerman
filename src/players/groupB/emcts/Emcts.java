@@ -8,6 +8,7 @@ import players.groupB.interfaces.MctsPlayable;
 import players.groupB.utils.Const;
 import players.groupB.utils.EMCTSParams;
 import players.groupB.utils.EMCTSsol;
+import players.mcts.SingleTreeNode;
 import players.optimisers.ParameterSet;
 import utils.ElapsedCpuTimer;
 
@@ -73,6 +74,25 @@ public class Emcts implements GamePlayable {
         this.elapsedTimer = elapsedTimer;
     }
 
+    private void backUp(EMCTSsol node, double result)
+    {
+        EMCTSsol n = node;
+        while(n != null)
+        {
+            n.increaseVisitedCount();
+
+            double totValue = 0.0;
+            totValue += result;
+
+            if (result < n.getBounds()[0]) {
+                n.setBounds1(result);
+            }
+            if (result > n.getBounds()[1]) {
+                n.setBounds2(result);
+            }
+            n = n.getParent();
+        }
+    }
 
 
 

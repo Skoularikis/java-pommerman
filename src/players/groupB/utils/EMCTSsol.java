@@ -9,6 +9,21 @@ public class EMCTSsol {
     private Individual population;
     private int visited_count = 0;
     private ArrayList<EMCTSsol> children;
+    private double[] bounds = new double[]{Double.MAX_VALUE, -Double.MAX_VALUE};
+
+    public double[] getBounds() {
+        return bounds;
+    }
+
+    public void setBounds(double[] bounds) {
+        this.bounds = bounds;
+    }
+    public void setBounds1(double bounds1) {
+        this.bounds[0] = bounds1;
+    }
+    public void setBounds2(double bounds2) {
+        this.bounds[1] = bounds2;
+    }
 
     public Individual getPopulation() {
         return population;
