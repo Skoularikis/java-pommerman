@@ -42,22 +42,25 @@ public class Emcts implements GamePlayable {
     @Override
     public void setRootState(GameState gameState) {
         this.rootState = gameState;
-
         this.mctsOperations.setParamsHelper(rootState, this.params);
         this.evoOperations.setParamsHelper(rootState, this.params);
-        EMCTSsol asd = evoOperations.createRootStateSolution();
-        System.out.println(asd);
     }
 
     @Override
-    public void getActionToExecute() {
+    public void getActionToExecute(boolean isRootState) {
+
         boolean stop = false;
         while (!stop){
-            EMCTSsol rootSol = evoOperations.createRootStateSolution();
+            EMCTSsol rootSol = evoOperations.createRootStateSolution(isRootState);
+
+
+//            mctsOperations.treePolicy(rootSol);
+
 //            createRootStateSolution(rootState.copy());
 //            EMCTSsol selected = treePolicy(rootState, root);
             //EVaulaute Selected
 //            backUp(selected, delta);
+            stop = true;
         }
     }
 

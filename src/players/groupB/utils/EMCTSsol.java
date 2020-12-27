@@ -1,11 +1,14 @@
 package players.groupB.utils;
 import players.rhea.evo.Individual;
 
+import java.util.ArrayList;
+
 public class EMCTSsol {
 
+    private EMCTSsol parent;
     private Individual population;
-    private Individual parent;
     private int visited_count = 0;
+    private ArrayList<EMCTSsol> children;
 
     public Individual getPopulation() {
         return population;
@@ -15,11 +18,11 @@ public class EMCTSsol {
         this.population = population;
     }
 
-    public Individual getParent() {
+    public EMCTSsol getParent() {
         return parent;
     }
 
-    public void setParent(Individual parent) {
+    public void setParent(EMCTSsol parent) {
         this.parent = parent;
     }
 
@@ -31,4 +34,11 @@ public class EMCTSsol {
         this.visited_count++;
     }
 
+    public ArrayList<EMCTSsol> getChildren() {
+        return children;
+    }
+
+    public void setChildren(ArrayList<EMCTSsol> children) {
+        this.children = children;
+    }
 }

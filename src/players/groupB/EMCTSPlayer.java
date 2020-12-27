@@ -16,6 +16,7 @@ public class EMCTSPlayer extends ParameterizedPlayer {
 
     private ParameterSet params;
     private GamePlayable gamePlayable;
+    private boolean isRootState = true;
 
     protected EMCTSPlayer(long seed, int pId) {
         super(seed, pId);
@@ -47,8 +48,10 @@ public class EMCTSPlayer extends ParameterizedPlayer {
     @Override
     public Types.ACTIONS act(GameState gs) {
         gamePlayable.setRootState(gs);
-//        gamePlayable.getActionToExecute();
+        gamePlayable.getActionToExecute(this.isRootState);
 
+
+        this.isRootState = false;
         return null;
     }
 

@@ -10,6 +10,7 @@ import players.optimisers.ParameterSet;
 import players.rhea.evo.Individual;
 import utils.ElapsedCpuTimer;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import static players.groupB.helpers.ActionsHelper.fillIndividualWithRandomActions;
@@ -37,9 +38,11 @@ public class EvoOperations implements EvoPlayable {
     }
 
     @Override
-    public EMCTSsol createRootStateSolution() {
+    public EMCTSsol createRootStateSolution(boolean isRootState) {
         rootStateSolution = new EMCTSsol();
-        rootStateSolution.setParent(null);
+        if (isRootState){
+            rootStateSolution.setParent(null);
+        }
         if (rootStateSolution.getPopulation() == null){
             rootStateSolution.setPopulation(
                     new Individual(
@@ -49,6 +52,13 @@ public class EvoOperations implements EvoPlayable {
             );
             if (this.paramsHelper.getInitType() == Const.InitType.INIT_RANDOM) {
                 fillIndividualWithRandomActions(rootStateSolution.getPopulation(),randomGenerator);
+                rootStateSolution.setChildren(new ArrayList<EMCTSsol>());
+                for (int i=0; i < getAvailableActions().size(); i++) {
+                    EMCTSsol child = new EMCTSsol();
+                    child.setParent(rootStateSolution);
+                    rootStateSolution.getChildren().add(child);
+                }
+
             }
             return rootStateSolution;
         }
