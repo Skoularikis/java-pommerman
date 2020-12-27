@@ -1,5 +1,6 @@
 package players.groupB.utils;
 
+import players.groupB.utils.Const;
 import players.optimisers.ParameterSet;
 import utils.Pair;
 import utils.Types;
@@ -8,85 +9,77 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static players.rhea.utils.Constants.CUSTOM_HEURISTIC;
 
 public class EMCTSParams implements ParameterSet {
+    //FM budget
+    public int fm_budget = Const.BudgetType.FM_BUDGET;
+
 
     private int budget_type = 1;
     private int individual_length = 12;
     private int iteration_budget = 200;
     private double mutation_rate = 0.5;
-    private int heuristic_method = CUSTOM_HEURISTIC;
+    private int heuristic_method = Const.Heuristics.CUSTOM_HEURISTIC;
     private int tree_depth = 8;
+    private boolean shift_buffer = true;
+    private int init_type = Const.InitType.INIT_RANDOM;
 
-    private HashMap<Integer, Types.ACTIONS> action_mapping;
-
-    //
     private int time_budget = 40;
 
-    public int getBudget_type() {
-        return budget_type;
-    }
-
-    public void setBudget_type(int budget_type) {
-        this.budget_type = budget_type;
-    }
-
-    public int getIndividual_length() {
-        return individual_length;
-    }
-
-    public void setIndividual_length(int individual_length) {
-        this.individual_length = individual_length;
-    }
-
-    public int getIteration_budget() {
-        return iteration_budget;
-    }
-
-    public void setIteration_budget(int iteration_budget) {
-        this.iteration_budget = iteration_budget;
-    }
-
-    public double getMutation_rate() {
-        return mutation_rate;
-    }
-
-    public void setMutation_rate(double mutation_rate) {
-        this.mutation_rate = mutation_rate;
-    }
-
-    public int getHeuristic_method() {
-
-        return heuristic_method;
-    }
-
-    public void setHeuristic_method(int heuristic_method) {
-        this.heuristic_method = heuristic_method;
-    }
-
-    public int getTree_depth() {
-        return tree_depth;
-    }
-
-    public void setTree_depth(int tree_depth) {
-        this.tree_depth = tree_depth;
-    }
-
-    public int getTime_budget() {
-        return time_budget;
-    }
-
-    public void setTime_budget(int time_budget) {
-        this.time_budget = time_budget;
-    }
-
     @Override
-    public void setParameterValue(String param, Object value) {
+    public void setParameterValue(String name, Object value) {
+        switch(name) {
+            case "init_type":
+                init_type = (int) value;
+                break;
+            case "shift_buffer":
+                shift_buffer = (boolean) value;
+                break;
+            case "fm_budget":
+                fm_budget = (int) value;
+                break;
+            case "budget_type":
+                budget_type = (int) value;
+                break;
+            case "individual_length":
+                individual_length = (int) value;
+                break;
+            case "iteration_budget":
+                iteration_budget = (int) value;
+                break;
+            case "mutation_rate":
+                mutation_rate = (double) value;
+                break;
+            case "heuristic_method":
+                heuristic_method = (int) value;
+                break;
+            case "tree_depth":
+                tree_depth = (int) value;
+                break;
+        }
     }
 
     @Override
     public Object getParameterValue(String root) {
+        Object value = null;
+        switch(root) {
+            case "init_type":
+                return init_type;
+            case "shift_buffer":
+                return shift_buffer;
+            case "fm_budget":
+                return fm_budget;
+            case "budget_type":
+                return budget_type;
+            case "individual_length":
+                return individual_length;
+            case "iteration_budget":
+                return iteration_budget;
+            case "mutation_rate":
+                return mutation_rate;
+            case "heuristic_method":
+                return heuristic_method;
+        }
         return null;
     }
 
@@ -114,17 +107,8 @@ public class EMCTSParams implements ParameterSet {
     public Map<String, String[]> constantNames() {
         return null;
     }
-    public HashMap<Integer, Types.ACTIONS> getAvailableActions () {
 
-        ArrayList<Types.ACTIONS> availableActions = Types.ACTIONS.all();
-        int max_actions = availableActions.size();
-        action_mapping = new HashMap<>();
-        for (int i = 0; i < max_actions; i++) {
-            action_mapping.put(i, availableActions.get(i));
-        }
-        action_mapping.put(max_actions, Types.ACTIONS.ACTION_STOP);
 
-        return action_mapping;
-    }
+
 
 }

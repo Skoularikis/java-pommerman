@@ -1,77 +1,79 @@
 package players.groupB.emcts;
 
 import core.GameState;
+import players.groupB.helpers.ObjectHelper;
+import players.groupB.interfaces.EvoPlayable;
 import players.groupB.interfaces.GamePlayable;
+import players.groupB.interfaces.MctsPlayable;
+import players.groupB.utils.Const;
 import players.groupB.utils.EMCTSParams;
-import players.heuristics.*;
-import players.mcts.SingleTreeNode;
-import players.rhea.utils.FMBudget;
+import players.groupB.utils.EMCTSsol;
+import players.optimisers.ParameterSet;
 import utils.ElapsedCpuTimer;
-import utils.Types;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
-
-import static players.rhea.utils.Constants.*;
-import static players.rhea.utils.Constants.WIN_SCORE_HEURISTIC;
 
 
 public class Emcts implements GamePlayable {
-
-    private Emcts[] children;
-    private EMCTSParams params;
-    private Random randomGenerator;
-    private StateHeuristic stateHeuristic;
+    //CPU Timer
     private ElapsedCpuTimer elapsedTimer;
-
+    // For MCTS part
+    private MctsPlayable mctsOperations;
+    // For Evo part
+    private EvoPlayable evoOperations;
+    // For params
+    private EMCTSParams params;
+    // Random Generator
+    private Random randomGenerator;
+    // GameState
     public GameState rootState;
-    private FMBudget fmBudget;
 
-    public Emcts(EMCTSParams params, Random randomGenerator) {
-        this.params = params;
+    public Emcts(ParameterSet params, Random randomGenerator) {
+        //Set up EMCTS parameters
+        this.params = (EMCTSParams)params;
         this.randomGenerator = randomGenerator;
-        this.children = new Emcts[params.getAvailableActions().size()];
+        setUpElapsedCpuTimer(this.params);
+        //Initialize MctsOperations
+        this.mctsOperations = new MctsOperations(this.randomGenerator, this.elapsedTimer);
+        //Initialize EvoOperations
+        this.evoOperations = new EvoOperations(this.randomGenerator, this.elapsedTimer);
     }
 
     @Override
-    public void setRootState(GameState gameState, ElapsedCpuTimer elapsedCpuTimer) {
-        rootState = gameState;
-        this.elapsedTimer = elapsedCpuTimer;
-        fmBudget.reset();
-        switch (params.getHeuristic_method()) {
-            case PLAYER_COUNT_HEURISTIC:
-                stateHeuristic = new PlayerCountHeuristic();
-                break;
-            case CUSTOM_HEURISTIC:
-                stateHeuristic = new CustomHeuristic(rootState);
-                break;
-            case ADVANCED_HEURISTIC:
-                stateHeuristic = new AdvancedHeuristic(rootState, randomGenerator);
-                break;
-            default:
-            case WIN_SCORE_HEURISTIC:
-                stateHeuristic = new WinScoreHeuristic();
-                break;
-        }
+    public void setRootState(GameState gameState) {
+        this.rootState = gameState;
+
+        this.mctsOperations.setParamsHelper(rootState, this.params);
+        this.evoOperations.setParamsHelper(rootState, this.params);
+        EMCTSsol asd = evoOperations.createRootStateSolution();
+        System.out.println(asd);
     }
 
     @Override
     public void getActionToExecute() {
         boolean stop = false;
         while (!stop){
-            createRootStateSolution(rootState.copy());
-            EMCTS[] selected = treePolicy(state);
+            EMCTSsol rootSol = evoOperations.createRootStateSolution();
+//            createRootStateSolution(rootState.copy());
+//            EMCTSsol selected = treePolicy(rootState, root);
             //EVaulaute Selected
-            backUp(selected, delta);
+//            backUp(selected, delta);
         }
     }
 
-    private void createRootStateSolution(GameState copy) {
+    private void setUpElapsedCpuTimer(EMCTSParams params) {
+        ElapsedCpuTimer elapsedTimer = null;
+        if (ObjectHelper.getIntValue(params.getParameterValue("budget_type")) == Const.BudgetType.TIME_BUDGET) {
+            elapsedTimer = new ElapsedCpuTimer();
+            elapsedTimer.setMaxTimeMillis(ObjectHelper.getIntValue(params.getParameterValue("time_budget")));
+        }
+        this.elapsedTimer = elapsedTimer;
     }
 
-    private Emcts treePolicy(GameState state) {
-        return null;
-    }
+
+
+
+
+
 }
 

@@ -1,5 +1,9 @@
 import core.Game;
 import players.*;
+import players.groupB.EMCTSPlayer;
+import players.groupB.utils.Const;
+import players.groupB.utils.EMCTSParams;
+import players.heuristics.CustomHeuristic;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rhea.RHEAPlayer;
@@ -9,6 +13,7 @@ import utils.*;
 
 import java.util.*;
 
+import static players.groupB.utils.Const.BudgetType.ITERATION_BUDGET;
 import static utils.Types.VISUALS;
 
 public class Run {
@@ -33,7 +38,7 @@ public class Run {
 
         //default
         if(args.length == 0)
-            args = new String[]{"0", "2", "2", "-1", "2", "3", "4", "5"};
+            args = new String[]{"0", "2", "2", "-1", "0", "3", "4", "5"};
 
         if(args.length != 8) {
             printHelp();
@@ -86,8 +91,17 @@ public class Run {
 
                 switch(agentType) {
                     case 0:
-                        p = new DoNothingPlayer(playerID++);
-                        playerStr[i-4] = "DoNothing";
+                        EMCTSParams emctsParams = new EMCTSParams();
+                        emctsParams.setParameterValue("budget_type", ITERATION_BUDGET);
+                        emctsParams.setParameterValue("iteration_budget", 200);
+                        emctsParams.setParameterValue("fm_budget", 2000);
+                        emctsParams.setParameterValue("individual_length", 12);
+                        emctsParams.setParameterValue("heuristic_method", Const.Heuristics.CUSTOM_HEURISTIC);
+                        emctsParams.setParameterValue("mutation_rate", 0.5);
+                        p = new EMCTSPlayer(seed, playerID++, emctsParams);
+                        playerStr[i-4] = "EMCTS";
+//                        p = new DoNothingPlayer(playerID++);
+//                        playerStr[i-4] = "DoNothing";
                         break;
                     case 1:
                         p = new RandomPlayer(seed, playerID++);
