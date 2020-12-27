@@ -52,7 +52,12 @@ public class Emcts implements GamePlayable {
 
         boolean stop = false;
         while (!stop){
-            EMCTSsol rootSol = evoOperations.createRootStateSolution(isRootState);
+            EMCTSsol rootSol = (EMCTSsol)evoOperations.createRootStateSolution(isRootState);
+
+            EMCTSsol asd = rootSol;
+
+//           EMCTSsol selected = mctsOperations.treePolicy(rootSol);
+
 
 
 //            mctsOperations.treePolicy(rootSol);
@@ -73,30 +78,5 @@ public class Emcts implements GamePlayable {
         }
         this.elapsedTimer = elapsedTimer;
     }
-
-    private void backUp(EMCTSsol node, double result)
-    {
-        EMCTSsol n = node;
-        while(n != null)
-        {
-            n.increaseVisitedCount();
-
-            double totValue = 0.0;
-            totValue += result;
-
-            if (result < n.getBounds()[0]) {
-                n.setBounds1(result);
-            }
-            if (result > n.getBounds()[1]) {
-                n.setBounds2(result);
-            }
-            n = n.getParent();
-        }
-    }
-
-
-
-
-
 }
 

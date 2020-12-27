@@ -3,18 +3,16 @@ import players.rhea.evo.Individual;
 
 import java.util.ArrayList;
 
-public class EMCTSsol {
+public class EMCTSsol extends Solution {
 
     private EMCTSsol parent;
     private Individual population;
-    private int visited_count = 0;
     private ArrayList<EMCTSsol> children;
     private double[] bounds = new double[]{Double.MAX_VALUE, -Double.MAX_VALUE};
 
     public double[] getBounds() {
         return bounds;
     }
-
     public void setBounds(double[] bounds) {
         this.bounds = bounds;
     }
@@ -28,7 +26,6 @@ public class EMCTSsol {
     public Individual getPopulation() {
         return population;
     }
-
     public void setPopulation(Individual population) {
         this.population = population;
     }
@@ -39,14 +36,6 @@ public class EMCTSsol {
 
     public void setParent(EMCTSsol parent) {
         this.parent = parent;
-    }
-
-    public int getVisited_count() {
-        return visited_count;
-    }
-
-    public void increaseVisitedCount() {
-        this.visited_count++;
     }
 
     public ArrayList<EMCTSsol> getChildren() {

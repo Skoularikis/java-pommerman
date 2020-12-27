@@ -6,6 +6,8 @@ import players.groupB.helpers.ParamsHelper;
 import players.groupB.interfaces.MctsPlayable;
 import players.groupB.utils.EMCTSParams;
 import players.groupB.utils.EMCTSsol;
+import players.groupB.utils.Solution;
+import players.mcts.SingleTreeNode;
 import players.optimisers.ParameterSet;
 import players.rhea.utils.FMBudget;
 import utils.ElapsedCpuTimer;
@@ -30,18 +32,41 @@ public class MctsOperations implements MctsPlayable {
 
 
     @Override
-    public void treePolicy(GameState gs) {
-
+    public Solution treePolicy(Solution sol) {
+        EMCTSsol emctSsol = (EMCTSsol)sol;
+        //NEED TO ADD MORE IN THE TREE OR IN THE METHOD IMPLEMENTING THE MUTATION (BETTER THERE)
+        if (!this.gameState.isTerminal()) {
+            if (notFullyExpanded(emctSsol)) {
+                //return Mutated population
+            }
+        }
+        return null;
     }
 
+
+//    @Override
+//    public void rollOut(GameState state) {
+//
+//    }
+
     @Override
-    public void rollOut(GameState state) {
+    public void backUp(EMCTSsol node, double result) {
+        EMCTSsol n = node;
+        while(n != null)
+        {
+            n.increaseVisitedCount();
 
-    }
+            double totValue = 0.0;
+            totValue += result;
 
-    @Override
-    public void backUp(GameState node, double result) {
-
+            if (result < n.getBounds()[0]) {
+                n.setBounds1(result);
+            }
+            if (result > n.getBounds()[1]) {
+                n.setBounds2(result);
+            }
+            n = n.getParent();
+        }
     }
 
     @Override
@@ -50,6 +75,15 @@ public class MctsOperations implements MctsPlayable {
         if (this.paramsHelper == null){
             this.paramsHelper = new ParamsHelper(gameState, params, this.randomGenerator);
         }
+    }
+
+    private boolean notFullyExpanded(EMCTSsol emctSsol) {
+        for (EMCTSsol sol : emctSsol.getChildren()) {
+            if (sol.getPopulation() == null) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

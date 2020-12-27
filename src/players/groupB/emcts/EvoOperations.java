@@ -51,7 +51,9 @@ public class EvoOperations implements EvoPlayable {
                             getAvailableActions().size())
             );
             if (this.paramsHelper.getInitType() == Const.InitType.INIT_RANDOM) {
-                fillIndividualWithRandomActions(rootStateSolution.getPopulation(),randomGenerator);
+                if (isRootState){
+                    fillIndividualWithRandomActions(rootStateSolution.getPopulation(),randomGenerator);
+                }
                 rootStateSolution.setChildren(new ArrayList<EMCTSsol>());
                 for (int i=0; i < getAvailableActions().size(); i++) {
                     EMCTSsol child = new EMCTSsol();
