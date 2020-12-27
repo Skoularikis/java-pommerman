@@ -53,8 +53,13 @@ public class Emcts implements GamePlayable {
         boolean stop = false;
         while (!stop){
             EMCTSsol rootSol = (EMCTSsol)evoOperations.createRootStateSolution(isRootState);
+            //Mutate children
 
-            EMCTSsol asd = rootSol;
+            // Evaluate each child by moving there -> FMBuget
+
+            // Select best child by tree Policy
+            EMCTSsol selectedSolution = (EMCTSsol)mctsOperations.treePolicy(rootSol);
+            mctsOperations.backUp(selectedSolution);
 
 //           EMCTSsol selected = mctsOperations.treePolicy(rootSol);
 

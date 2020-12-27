@@ -8,8 +8,9 @@ import players.optimisers.ParameterSet;
 import players.rhea.utils.FMBudget;
 
 public interface MctsPlayable {
-    Solution treePolicy(Solution emctSsol);
-//    void rollOut(GameState state);
-    void backUp(EMCTSsol node, double result);
+    Solution treePolicy(Solution solution);
+    void rollOut(GameState state);
+    double uctValue(Solution solution);
+    void backUp(Solution node);
     void setParamsHelper(GameState gameState, ParameterSet params);
 }

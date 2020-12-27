@@ -7,6 +7,7 @@ public final class Const {
 
     public static final double epsilon = 1e-6;
     public static final int break_ms = 5;
+    public static final double K = Math.sqrt(2);
 
     public static final class InitType{
         private InitType(){}
