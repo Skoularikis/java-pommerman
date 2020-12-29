@@ -1,6 +1,7 @@
 package players.groupB.helpers;
 
 import core.GameState;
+import players.groupB.utils.Const;
 import players.heuristics.*;
 
 import java.util.Random;
@@ -11,6 +12,7 @@ import static players.rhea.utils.Constants.*;
 import static players.rhea.utils.Constants.WIN_SCORE_HEURISTIC;
 
 public class ParamsHelper {
+
     private GameState gameState;
     private Random randomGenerator;
     private StateHeuristic stateHeuristic;
@@ -44,13 +46,16 @@ public class ParamsHelper {
         return stateHeuristic;
     }
 
-    public int getIndividualLength() {
-        return ObjectHelper.getIntValue(this.params.getParameterValue("individual_length"));
+    public int getIntValue(String name) {
+        return ObjectHelper.getIntValue(this.params.getParameterValue(name));
     }
 
-    public int getInitType() {
-        return ObjectHelper.getIntValue(this.params.getParameterValue("init_type"));
+    public String getStringValue(String name) {
+        return ObjectHelper.getStringValue(this.params.getParameterValue(name));
     }
 
+    public double getDoubleValue(String name) {
+        return ObjectHelper.getDoubleValue(this.params.getParameterValue(name));
+    }
 
 }

@@ -1,6 +1,8 @@
 package players.groupB.helpers;
+import core.GameState;
 import players.rhea.evo.Individual;
 import utils.Types;
+import utils.Vector2d;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,4 +30,56 @@ public class ActionsHelper {
 
         return action_mapping;
     }
+
+    public static ArrayList<Types.ACTIONS> getAvailableActionsInArrayList(){
+        return Types.ACTIONS.all();
+    }
+
+    public static ArrayList<Types.ACTIONS> getSafeRandomActions(GameState state, Random randomGenerator) {
+        Types.TILETYPE[][] board = state.getBoard();
+        ArrayList<Types.ACTIONS> actionsToTry = getAvailableActionsInArrayList();
+        int width = board.length;
+        int height = board[0].length;
+
+        for(Types.ACTIONS nAction : getAvailableActionsInArrayList()) {
+
+            Vector2d dir = nAction.getDirection().toVec();
+
+            Vector2d pos = state.getPosition();
+            int x = pos.x + dir.x;
+            int y = pos.y + dir.y;
+
+            if (x < 0 && x >= width && y < 0 && y >= height)
+                actionsToTry.remove(nAction);
+        }
+        return actionsToTry;
+    }
+
+    public static int safeRandomAction(GameState state, Random randomGenerator) {
+        Types.TILETYPE[][] board = state.getBoard();
+        ArrayList<Types.ACTIONS> actionsToTry = getAvailableActionsInArrayList();
+        int width = board.length;
+        int height = board[0].length;
+
+        while(actionsToTry.size() > 0) {
+
+            int nAction = randomGenerator.nextInt(actionsToTry.size());
+            Types.ACTIONS act = actionsToTry.get(nAction);
+            Vector2d dir = act.getDirection().toVec();
+
+            Vector2d pos = state.getPosition();
+            int x = pos.x + dir.x;
+            int y = pos.y + dir.y;
+
+            if (x >= 0 && x < width && y >= 0 && y < height)
+                if(board[y][x] != Types.TILETYPE.FLAMES)
+                    return nAction;
+
+            actionsToTry.remove(nAction);
+        }
+
+        //Uh oh...
+        return randomGenerator.nextInt(getAvailableActionsInArrayList().size());
+    }
+
 }

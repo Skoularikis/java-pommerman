@@ -6,6 +6,8 @@ import players.groupB.emcts.Emcts;
 import players.groupB.helpers.ObjectHelper;
 import players.groupB.interfaces.GamePlayable;
 import players.groupB.utils.EMCTSParams;
+import players.groupB.utils.EMCTSsol;
+import players.groupB.utils.Solution;
 import players.optimisers.ParameterSet;
 import players.optimisers.ParameterizedPlayer;
 import utils.Types;
@@ -16,6 +18,8 @@ public class EMCTSPlayer extends ParameterizedPlayer {
 
     private ParameterSet params;
     private GamePlayable gamePlayable;
+    private Random randomGenerator;
+    private Solution currentSolution;
     private boolean isRootState = true;
 
     protected EMCTSPlayer(long seed, int pId) {
@@ -38,17 +42,19 @@ public class EMCTSPlayer extends ParameterizedPlayer {
             super.setParameters(this.params);
         }
         // Set up random generator
-        Random randomGenerator = new Random(seed);
+        this.randomGenerator = new Random(seed);
+        // Root of the tree
+        gamePlayable = new Emcts(this.params, this.randomGenerator);
 
-        //Initialize interface
-        gamePlayable = new Emcts(this.params, randomGenerator);
 ;
     }
 
     @Override
     public Types.ACTIONS act(GameState gs) {
-        gamePlayable.setRootState(gs);
-        gamePlayable.getActionToExecute(this.isRootState);
+        gamePlayable.setRootState(gs, this.currentSolution);
+
+
+//        gamePlayable.getActionToExecute(this.isRootState);
 
 
         this.isRootState = false;

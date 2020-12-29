@@ -1,19 +1,18 @@
 package players.groupB.emcts;
 
 import core.GameState;
-import players.groupB.helpers.ObjectHelper;
 import players.groupB.helpers.ParamsHelper;
 import players.groupB.interfaces.MctsPlayable;
 import players.groupB.utils.Const;
-import players.groupB.utils.EMCTSParams;
 import players.groupB.utils.EMCTSsol;
 import players.groupB.utils.Solution;
-import players.mcts.SingleTreeNode;
 import players.optimisers.ParameterSet;
-import players.rhea.utils.FMBudget;
 import utils.ElapsedCpuTimer;
+import utils.Types;
 import utils.Utils;
+import utils.Vector2d;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class MctsOperations implements MctsPlayable {
@@ -38,7 +37,7 @@ public class MctsOperations implements MctsPlayable {
         EMCTSsol emctSsol = (EMCTSsol)sol;
         EMCTSsol selected = null;
         if (!this.gameState.isTerminal()) {
-            if (fullyExpanded(emctSsol)) {
+
                 double bestValue = -Double.MAX_VALUE;
                 for (EMCTSsol child : emctSsol.getChildren()){
                     double uctValue = uctValue(child);
@@ -46,7 +45,7 @@ public class MctsOperations implements MctsPlayable {
                         selected = child;
                         bestValue = uctValue;
                     }
-                }
+
                 if (selected == null)
                 {
                     throw new RuntimeException("Warning! returning null: " + bestValue + " : " + emctSsol.getChildren().size() + " " +
@@ -60,6 +59,26 @@ public class MctsOperations implements MctsPlayable {
     @Override
     public void rollOut(GameState state) {
 
+    }
+
+    @Override
+    public void roll(GameState gs, Types.ACTIONS act) {
+        //Simple, all random first, then my position.
+        int nPlayers = 4;
+        Types.ACTIONS[] actionsAll = new Types.ACTIONS[4];
+        int playerId = gs.getPlayerId() - Types.TILETYPE.AGENT0.getKey();
+        for(int i = 0; i < nPlayers; ++i)
+        {
+            if(i == playerId)
+            {
+                actionsAll[i] = act;
+            }
+            else{
+                int actionIdx = this.randomGenerator.nextInt(gs.nActions()); //mcts -> right, rhea -> place a bomb, random player -> rugth
+                actionsAll[i] = Types.ACTIONS.all().get(actionIdx);
+            }
+        }
+        gs.next(actionsAll);
     }
 
     @Override
@@ -77,7 +96,7 @@ public class MctsOperations implements MctsPlayable {
     @Override
     public void backUp(Solution node) {
         EMCTSsol n = (EMCTSsol)node;
-        while(n.getParent() != null)
+        while(n != null)
         {
             n.increaseVisitedCount();
             double parentTotValue = n.getParent().getPopulation().get_value();
@@ -101,16 +120,20 @@ public class MctsOperations implements MctsPlayable {
         this.gameState = gameState;
         if (this.paramsHelper == null){
             this.paramsHelper = new ParamsHelper(gameState, params, this.randomGenerator);
+            this.paramsHelper.setUpSuitableHeuristic(this.paramsHelper.getIntValue("heuristic_method"));
         }
     }
 
-    private boolean fullyExpanded(EMCTSsol emctSsol) {
-        for (EMCTSsol sol : emctSsol.getChildren()) {
-            if (sol.getPopulation() == null) {
-                return false;
-            }
-        }
-        return true;
+
+    @Override
+    public boolean finishRollout(GameState gameState, int thisDepth) {
+        if (thisDepth >= this.paramsHelper.getIntValue("individual_length"))      //rollout end condition.
+            return true;
+
+        if (gameState.isTerminal())               //end of game
+            return true;
+
+        return false;
     }
 
 }

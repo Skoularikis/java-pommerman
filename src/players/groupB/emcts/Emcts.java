@@ -2,17 +2,24 @@ package players.groupB.emcts;
 
 import core.GameState;
 import players.groupB.helpers.ObjectHelper;
+import players.groupB.helpers.ParamsHelper;
 import players.groupB.interfaces.EvoPlayable;
 import players.groupB.interfaces.GamePlayable;
 import players.groupB.interfaces.MctsPlayable;
 import players.groupB.utils.Const;
 import players.groupB.utils.EMCTSParams;
 import players.groupB.utils.EMCTSsol;
-import players.mcts.SingleTreeNode;
+import players.groupB.utils.Solution;
 import players.optimisers.ParameterSet;
+import players.rhea.evo.Individual;
 import utils.ElapsedCpuTimer;
+import utils.Types;
+import utils.Utils;
 
+import java.util.ArrayList;
 import java.util.Random;
+
+import static players.groupB.helpers.ActionsHelper.*;
 
 
 public class Emcts implements GamePlayable {
@@ -26,8 +33,8 @@ public class Emcts implements GamePlayable {
     private EMCTSParams params;
     // Random Generator
     private Random randomGenerator;
-    // GameState
-    public GameState rootState;
+    // EMCTSsol
+    public EMCTSsol currentRootState;
 
     public Emcts(ParameterSet params, Random randomGenerator) {
         //Set up EMCTS parameters
@@ -41,22 +48,40 @@ public class Emcts implements GamePlayable {
     }
 
     @Override
-    public void setRootState(GameState gameState) {
-        this.rootState = gameState;
-        this.mctsOperations.setParamsHelper(rootState, this.params);
-        this.evoOperations.setParamsHelper(rootState, this.params);
+    public void setRootState(GameState gameState, Solution currentRootState) {
+        this.mctsOperations.setParamsHelper(gameState, this.params);
+        this.evoOperations.setParamsHelper(gameState, this.params);
+        if (currentRootState == null) { // Root of the tree
+            ParamsHelper paramsHelper = evoOperations.getParamsHelper();
+            this.currentRootState = createRootStateSolutionWithGreedyAction(gameState, paramsHelper);
+        }
+        else { // Leaf node
+            this.currentRootState = (EMCTSsol) currentRootState;
+        }
+//        EMCTSsol rootSol = (EMCTSsol)evoOperations.createRootStateSolution(true);
+
+//        Solution[] children = rootSol.getChildren().toArray(new EMCTSsol[0]);
+////        mctsOperations.notFullyExpanded(children);
+//        children[1].increaseVisitedCount();
+//        int visited = children[1].getVisited_count();
+////        rootSol.getChildren().get(1).setVisited_count(1);
+//        int originalCountChild = rootSol.getChildren().get(1).getVisited_count();
+//        boolean d = originalCountChild == visited;
+//        System.out.println(d);
     }
 
     @Override
     public void getActionToExecute(boolean isRootState) {
 
         boolean stop = false;
-        while (!stop){
-            EMCTSsol rootSol = (EMCTSsol)evoOperations.createRootStateSolution(isRootState);
-            //Mutate children
+        EMCTSsol rootSol = (EMCTSsol)evoOperations.createRootStateSolution(isRootState);
+
+        Solution[] children = rootSol.getChildren().toArray(new EMCTSsol[0]);
+        while (!stop) {
+            // Mutate children
 
             // Evaluate each child by moving there -> FMBuget
-
+            evoOperations.evaluate(rootSol);
             // Select best child by tree Policy
             EMCTSsol selectedSolution = (EMCTSsol)mctsOperations.treePolicy(rootSol);
             mctsOperations.backUp(selectedSolution);
@@ -73,6 +98,39 @@ public class Emcts implements GamePlayable {
 //            backUp(selected, delta);
             stop = true;
         }
+    }
+
+
+    private EMCTSsol createRootStateSolutionWithGreedyAction(GameState gs, ParamsHelper paramsHelper) {
+        EMCTSsol rootSolution = new EMCTSsol();
+        rootSolution.setPopulation(
+                new Individual(
+                        paramsHelper.getIntValue("individual_length"),
+                        randomGenerator,
+                        getAvailableActions().size()));
+        int depth = 0;
+        GameState gameState = gs.copy();
+        while (!this.mctsOperations.finishRollout(gameState,depth)) {
+            double maxQ = Double.NEGATIVE_INFINITY;
+            Types.ACTIONS bestAction = null;
+            GameState currentBestGameSate = null;
+            for (Types.ACTIONS act : getSafeRandomActions(gameState,this.randomGenerator)) {
+                GameState gsCopy = gameState.copy();
+                this.mctsOperations.roll(gsCopy, act);
+                double valState = paramsHelper.getStateHeuristic().evaluateState(gsCopy);
+                double Q = Utils.noise(valState, Const.epsilon, this.randomGenerator.nextDouble());
+                //System.out.println("Action:" + action + " score:" + Q);
+                if (Q > maxQ) {
+                    maxQ = Q;
+                    bestAction = act;
+                    currentBestGameSate = gs;
+                }
+            }
+            rootSolution.getPopulation().set_action(depth, getAvailableActionsInArrayList().indexOf(bestAction));
+            depth++;
+            gameState = currentBestGameSate;
+        }
+        return rootSolution;
     }
 
     private void setUpElapsedCpuTimer(EMCTSParams params) {

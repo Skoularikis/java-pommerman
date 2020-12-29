@@ -14,6 +14,11 @@ public class EMCTSParams implements ParameterSet {
     //FM budget
     public int fm_budget = Const.BudgetType.FM_BUDGET;
 
+    //Genetic Operator
+    private int genetic_operator = Const.GeneticOperators.MUTATION_AND_CROSSOVER;
+
+    //Evaluate
+    private int evaluate_update = Const.Evaluation.EVALUATE_UPDATE_AVERAGE;
 
     private int budget_type = 1;
     private int individual_length = 12;
@@ -29,6 +34,11 @@ public class EMCTSParams implements ParameterSet {
     @Override
     public void setParameterValue(String name, Object value) {
         switch(name) {
+            case "evaluate_update":
+                evaluate_update = (int)value;
+            case "genetic_operator":
+                genetic_operator = (int) value;
+                break;
             case "init_type":
                 init_type = (int) value;
                 break;
@@ -61,8 +71,11 @@ public class EMCTSParams implements ParameterSet {
 
     @Override
     public Object getParameterValue(String root) {
-        Object value = null;
         switch(root) {
+            case "evaluate_update":
+                return evaluate_update;
+            case "genetic_operator":
+                return genetic_operator;
             case "init_type":
                 return init_type;
             case "shift_buffer":

@@ -45,4 +45,13 @@ public class EMCTSsol extends Solution {
     public void setChildren(ArrayList<EMCTSsol> children) {
         this.children = children;
     }
+
+    public boolean notFullyExpanded() {
+        for (EMCTSsol sol : this.getChildren()) {
+            if (sol.getPopulation() == null) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

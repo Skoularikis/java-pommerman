@@ -6,15 +6,18 @@ import players.groupB.interfaces.EvoPlayable;
 import players.groupB.utils.Const;
 import players.groupB.utils.EMCTSParams;
 import players.groupB.utils.EMCTSsol;
+import players.groupB.utils.Solution;
+import players.heuristics.StateHeuristic;
 import players.optimisers.ParameterSet;
 import players.rhea.evo.Individual;
 import utils.ElapsedCpuTimer;
+import utils.Types;
+import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import static players.groupB.helpers.ActionsHelper.fillIndividualWithRandomActions;
-import static players.groupB.helpers.ActionsHelper.getAvailableActions;
+import static players.groupB.helpers.ActionsHelper.*;
 
 public class EvoOperations implements EvoPlayable {
 
@@ -27,6 +30,7 @@ public class EvoOperations implements EvoPlayable {
     public EvoOperations(Random randomGenerator, ElapsedCpuTimer elapsedTimer) {
         this.randomGenerator = randomGenerator;
         this.elapsedTimer = elapsedTimer;
+
     }
 
     @Override
@@ -34,7 +38,13 @@ public class EvoOperations implements EvoPlayable {
         this.gameState = gameState;
         if (this.paramsHelper == null){
             this.paramsHelper = new ParamsHelper(gameState, params, this.randomGenerator);
+            this.paramsHelper.setUpSuitableHeuristic(this.paramsHelper.getIntValue("heuristic_method"));
         }
+    }
+
+    @Override
+    public ParamsHelper getParamsHelper() {
+        return this.paramsHelper;
     }
 
     @Override
@@ -46,11 +56,11 @@ public class EvoOperations implements EvoPlayable {
         if (rootStateSolution.getPopulation() == null){
             rootStateSolution.setPopulation(
                     new Individual(
-                            this.paramsHelper.getIndividualLength(),
+                            this.paramsHelper.getIntValue("individual_length"),
                             randomGenerator,
                             getAvailableActions().size())
             );
-            if (this.paramsHelper.getInitType() == Const.InitType.INIT_RANDOM) {
+            if (this.paramsHelper.getIntValue("init_type") == Const.InitType.INIT_RANDOM) {
                 if (isRootState){
                     fillIndividualWithRandomActions(rootStateSolution.getPopulation(),randomGenerator);
                 }
@@ -66,4 +76,11 @@ public class EvoOperations implements EvoPlayable {
         }
         return null;
     }
+
+    @Override
+    public void evaluate(Solution solution) {
+
+    }
+
+
 }
