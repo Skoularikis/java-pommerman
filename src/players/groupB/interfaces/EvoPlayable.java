@@ -9,6 +9,6 @@ public interface EvoPlayable {
     Solution createRootStateSolution(boolean isRootState);
     void setParamsHelper(GameState gameState, ParameterSet params);
     ParamsHelper getParamsHelper();
-    void evaluate(Solution rootSol, boolean useMutationClass);
+    double evaluate(Solution rootSol, boolean useMutationClass);
 //    EMCTSsol mutate(EMCTSsol sol);
 }

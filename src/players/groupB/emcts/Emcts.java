@@ -67,26 +67,14 @@ public class Emcts implements GamePlayable {
     public void getActionToExecute(boolean isRootState) {
 
         boolean stop = false;
-        EMCTSsol selectedSolution = null;
-        int indx = 0;
         while (!stop) {
             EMCTSsol curSol = this.currentRootStateSolution.copy();
-            //MutatedChildren here
-            EMCTSsol child = curSol.getChildren().get(indx);
-            if (child.getVisited_count() == 0) {
-                evoOperations.evaluate(child, true);
-            }
-            else {
-                child = (EMCTSsol)mctsOperations.treePolicy(curSol);
-                indx = 0;
-            }
-            this.mctsOperations.backUp(child);
-            indx++;
-
-
+            EMCTSsol selected = (EMCTSsol)mctsOperations.treePolicy(curSol);
+            double evalValue = evoOperations.evaluate(selected, true);
+            this.mctsOperations.backUp(selected, evalValue);
             stop = true;
         }
-        this.currentRootStateSolution = selectedSolution;
+//        this.currentRootStateSolution = selectedSolution;
     }
 
 

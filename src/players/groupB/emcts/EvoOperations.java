@@ -26,7 +26,6 @@ public class EvoOperations implements EvoPlayable {
     public EvoOperations(Random randomGenerator, ElapsedCpuTimer elapsedTimer) {
         this.randomGenerator = randomGenerator;
         this.elapsedTimer = elapsedTimer;
-
     }
 
     @Override
@@ -74,8 +73,8 @@ public class EvoOperations implements EvoPlayable {
     }
 
     @Override
-    public void evaluate(Solution solution, boolean mutationClass) {
-
+    public double evaluate(Solution solution, boolean mutationClass) {
+        return 0.0;
     }
 
 
