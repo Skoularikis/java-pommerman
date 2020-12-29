@@ -46,12 +46,16 @@ public class EMCTSsol extends Solution {
         this.children = children;
     }
 
-    public boolean notFullyExpanded() {
-        for (EMCTSsol sol : this.getChildren()) {
-            if (sol.getPopulation() == null) {
-                return true;
-            }
-        }
-        return false;
+
+    public EMCTSsol copy() {
+        EMCTSsol a = new EMCTSsol();
+        a.setChildren(this.getChildren());
+        a.setParent(this.getParent());
+        a.setPopulation(this.getPopulation());
+        a.setVisited_count(this.getVisited_count());
+        a.setBounds1(this.getBounds()[0]);
+        a.setBounds2(this.getBounds()[1]);
+        a.setBounds(this.getBounds());
+        return a;
     }
 }

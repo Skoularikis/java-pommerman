@@ -10,7 +10,10 @@ import java.util.ArrayList;
 public interface MctsPlayable {
     Solution treePolicy(Solution solution);
 
+    Solution uct(Solution solution);
     double uctValue(Solution solution);
+
+
     void backUp(Solution node);
     void setParamsHelper(GameState gameState, ParameterSet params);
     boolean finishRollout(GameState gameState, int thisDepth);
@@ -18,5 +21,8 @@ public interface MctsPlayable {
 
     void rollOut(GameState state);
     void roll(GameState gameState, Types.ACTIONS actions);
+
+
+    boolean notFullyExpanded(Solution solution);
 
 }

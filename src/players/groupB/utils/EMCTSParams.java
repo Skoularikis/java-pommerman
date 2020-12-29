@@ -16,7 +16,7 @@ public class EMCTSParams implements ParameterSet {
 
     //Genetic Operator
     private int genetic_operator = Const.GeneticOperators.MUTATION_AND_CROSSOVER;
-
+    private int whatever = 0;
     //Evaluate
     private int evaluate_update = Const.Evaluation.EVALUATE_UPDATE_AVERAGE;
 

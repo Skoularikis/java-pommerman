@@ -33,8 +33,10 @@ public class Emcts implements GamePlayable {
     private EMCTSParams params;
     // Random Generator
     private Random randomGenerator;
+    // GameState
+    public GameState gameState;
     // EMCTSsol
-    public EMCTSsol currentRootState;
+    public EMCTSsol currentRootStateSolution;
 
     public Emcts(ParameterSet params, Random randomGenerator) {
         //Set up EMCTS parameters
@@ -49,55 +51,42 @@ public class Emcts implements GamePlayable {
 
     @Override
     public void setRootState(GameState gameState, Solution currentRootState) {
+        this.gameState = gameState;
         this.mctsOperations.setParamsHelper(gameState, this.params);
         this.evoOperations.setParamsHelper(gameState, this.params);
         if (currentRootState == null) { // Root of the tree
             ParamsHelper paramsHelper = evoOperations.getParamsHelper();
-            this.currentRootState = createRootStateSolutionWithGreedyAction(gameState, paramsHelper);
+            this.currentRootStateSolution = createRootStateSolutionWithGreedyAction(gameState, paramsHelper);
         }
         else { // Leaf node
-            this.currentRootState = (EMCTSsol) currentRootState;
+            this.currentRootStateSolution = (EMCTSsol) currentRootState;
         }
-//        EMCTSsol rootSol = (EMCTSsol)evoOperations.createRootStateSolution(true);
-
-//        Solution[] children = rootSol.getChildren().toArray(new EMCTSsol[0]);
-////        mctsOperations.notFullyExpanded(children);
-//        children[1].increaseVisitedCount();
-//        int visited = children[1].getVisited_count();
-////        rootSol.getChildren().get(1).setVisited_count(1);
-//        int originalCountChild = rootSol.getChildren().get(1).getVisited_count();
-//        boolean d = originalCountChild == visited;
-//        System.out.println(d);
     }
 
     @Override
     public void getActionToExecute(boolean isRootState) {
 
         boolean stop = false;
-        EMCTSsol rootSol = (EMCTSsol)evoOperations.createRootStateSolution(isRootState);
-
-        Solution[] children = rootSol.getChildren().toArray(new EMCTSsol[0]);
+        EMCTSsol selectedSolution = null;
+        int indx = 0;
         while (!stop) {
-            // Mutate children
+            EMCTSsol curSol = this.currentRootStateSolution.copy();
+            //MutatedChildren here
+            EMCTSsol child = curSol.getChildren().get(indx);
+            if (child.getVisited_count() == 0) {
+                evoOperations.evaluate(child, true);
+            }
+            else {
+                child = (EMCTSsol)mctsOperations.treePolicy(curSol);
+                indx = 0;
+            }
+            this.mctsOperations.backUp(child);
+            indx++;
 
-            // Evaluate each child by moving there -> FMBuget
-            evoOperations.evaluate(rootSol);
-            // Select best child by tree Policy
-            EMCTSsol selectedSolution = (EMCTSsol)mctsOperations.treePolicy(rootSol);
-            mctsOperations.backUp(selectedSolution);
 
-//           EMCTSsol selected = mctsOperations.treePolicy(rootSol);
-
-
-
-//            mctsOperations.treePolicy(rootSol);
-
-//            createRootStateSolution(rootState.copy());
-//            EMCTSsol selected = treePolicy(rootState, root);
-            //EVaulaute Selected
-//            backUp(selected, delta);
             stop = true;
         }
+        this.currentRootStateSolution = selectedSolution;
     }
 
 

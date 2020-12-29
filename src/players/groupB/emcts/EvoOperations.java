@@ -4,15 +4,11 @@ import core.GameState;
 import players.groupB.helpers.ParamsHelper;
 import players.groupB.interfaces.EvoPlayable;
 import players.groupB.utils.Const;
-import players.groupB.utils.EMCTSParams;
 import players.groupB.utils.EMCTSsol;
 import players.groupB.utils.Solution;
-import players.heuristics.StateHeuristic;
 import players.optimisers.ParameterSet;
 import players.rhea.evo.Individual;
 import utils.ElapsedCpuTimer;
-import utils.Types;
-import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -78,7 +74,7 @@ public class EvoOperations implements EvoPlayable {
     }
 
     @Override
-    public void evaluate(Solution solution) {
+    public void evaluate(Solution solution, boolean mutationClass) {
 
     }
 

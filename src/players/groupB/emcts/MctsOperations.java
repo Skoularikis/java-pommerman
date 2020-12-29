@@ -34,26 +34,7 @@ public class MctsOperations implements MctsPlayable {
 
     @Override
     public Solution treePolicy(Solution sol) {
-        EMCTSsol emctSsol = (EMCTSsol)sol;
-        EMCTSsol selected = null;
-        if (!this.gameState.isTerminal()) {
-
-                double bestValue = -Double.MAX_VALUE;
-                for (EMCTSsol child : emctSsol.getChildren()){
-                    double uctValue = uctValue(child);
-                    if (uctValue > bestValue) {
-                        selected = child;
-                        bestValue = uctValue;
-                    }
-
-                if (selected == null)
-                {
-                    throw new RuntimeException("Warning! returning null: " + bestValue + " : " + emctSsol.getChildren().size() + " " +
-                            + emctSsol.getBounds()[0] + " " + emctSsol.getBounds()[1]);
-                }
-            }
-        }
-        return selected;
+        return uct(sol);
     }
 
     @Override
@@ -79,6 +60,30 @@ public class MctsOperations implements MctsPlayable {
             }
         }
         gs.next(actionsAll);
+    }
+
+    @Override
+    public Solution uct(Solution solution) {
+        EMCTSsol emctSsol = (EMCTSsol)solution;
+        EMCTSsol selected = null;
+        if (!this.gameState.isTerminal()) {
+
+            double bestValue = -Double.MAX_VALUE;
+            for (EMCTSsol child : emctSsol.getChildren()){
+                double uctValue = uctValue(child);
+                if (uctValue > bestValue) {
+                    selected = child;
+                    bestValue = uctValue;
+                }
+
+                if (selected == null)
+                {
+                    throw new RuntimeException("Warning! returning null: " + bestValue + " : " + emctSsol.getChildren().size() + " " +
+                            + emctSsol.getBounds()[0] + " " + emctSsol.getBounds()[1]);
+                }
+            }
+        }
+        return selected;
     }
 
     @Override
@@ -133,6 +138,17 @@ public class MctsOperations implements MctsPlayable {
         if (gameState.isTerminal())               //end of game
             return true;
 
+        return false;
+    }
+
+    @Override
+    public boolean notFullyExpanded(Solution solution) {
+        EMCTSsol emctSsol = (EMCTSsol)solution;
+        for (EMCTSsol sol : emctSsol.getChildren()) {
+            if (sol.getVisited_count() == 0) {
+                return true;
+            }
+        }
         return false;
     }
 
