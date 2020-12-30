@@ -58,4 +58,8 @@ public class ParamsHelper {
         return ObjectHelper.getDoubleValue(this.params.getParameterValue(name));
     }
 
+    public boolean getBooleanValue(String name){
+        return ObjectHelper.getBooleanValue(this.params.getParameterValue(name));
+    }
+
 }

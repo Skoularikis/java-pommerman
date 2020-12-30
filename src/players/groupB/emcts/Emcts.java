@@ -61,6 +61,11 @@ public class Emcts implements GamePlayable {
         else { // Leaf node
             this.currentRootStateSolution = (EMCTSsol) currentRootState;
         }
+
+
+        Solution hela = this.evoOperations.mutate(this.currentRootStateSolution);
+
+        System.out.println(hela);
     }
 
     @Override

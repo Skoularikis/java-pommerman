@@ -9,17 +9,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static players.rhea.utils.Constants.*;
+
 
 public class EMCTSParams implements ParameterSet {
     //FM budget
     public int fm_budget = Const.BudgetType.FM_BUDGET;
 
     //Genetic Operator
-    private int genetic_operator = Const.GeneticOperators.MUTATION_AND_CROSSOVER;
-    private int whatever = 0;
+    private int genetic_operator = Const.GeneticOperators.MUTATION_ONLY;
     //Evaluate
     private int evaluate_update = Const.Evaluation.EVALUATE_UPDATE_AVERAGE;
 
+    private int mutation_type = MUTATION_UNIFORM;
     private int budget_type = 1;
     private int individual_length = 12;
     private int iteration_budget = 200;
@@ -28,6 +30,9 @@ public class EMCTSParams implements ParameterSet {
     private int tree_depth = 8;
     private boolean shift_buffer = true;
     private int init_type = Const.InitType.INIT_RANDOM;
+    private int gene_size = 1;
+    private int mutation_gene_count = 1;
+    private boolean elitism = false;
 
     private int time_budget = 40;
 
@@ -66,6 +71,19 @@ public class EMCTSParams implements ParameterSet {
             case "tree_depth":
                 tree_depth = (int) value;
                 break;
+            case "gene_size":
+                gene_size = (int) value;
+                break;
+            case "mutation_type":
+                mutation_type = (int) value;
+                break;
+            case "mutation_gene_count":
+                mutation_gene_count = (int) value;
+                break;
+            case "elitism":
+                elitism = (boolean) value;
+                break;
+
         }
     }
 
@@ -76,6 +94,8 @@ public class EMCTSParams implements ParameterSet {
                 return evaluate_update;
             case "genetic_operator":
                 return genetic_operator;
+            case "gene_size":
+                return gene_size;
             case "init_type":
                 return init_type;
             case "shift_buffer":
@@ -92,6 +112,12 @@ public class EMCTSParams implements ParameterSet {
                 return mutation_rate;
             case "heuristic_method":
                 return heuristic_method;
+            case "mutation_type":
+                return mutation_type;
+            case "mutation_gene_count":
+                return mutation_gene_count;
+            case "elitism":
+                return elitism;
         }
         return null;
     }
@@ -103,6 +129,10 @@ public class EMCTSParams implements ParameterSet {
 
     @Override
     public Map<String, Object[]> getParameterValues() {
+        HashMap<String, Object[]> parameterValues = new HashMap<>();
+        parameterValues.put("gene_size", new Integer[]{1, 2, 3, 4, 5});
+        parameterValues.put("mutation_type", new Integer[]{MUTATION_UNIFORM, MUTATION_BIT, MUTATION_BIAS});
+        parameterValues.put("mutation_gene_count", new Integer[]{1, 2, 3, 4, 5});
         return null;
     }
 

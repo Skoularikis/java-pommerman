@@ -34,4 +34,12 @@ public class ObjectHelper {
         }
         return 0.0;
     }
+
+    public static boolean getBooleanValue(Object obj){
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        return false;
+    }
+
 }

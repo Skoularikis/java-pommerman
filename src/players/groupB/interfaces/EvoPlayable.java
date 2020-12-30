@@ -5,10 +5,13 @@ import players.groupB.helpers.ParamsHelper;
 import players.groupB.utils.Solution;
 import players.optimisers.ParameterSet;
 
+
 public interface EvoPlayable {
     Solution createRootStateSolution(boolean isRootState);
     void setParamsHelper(GameState gameState, ParameterSet params);
     ParamsHelper getParamsHelper();
     double evaluate(Solution rootSol, boolean useMutationClass);
-//    EMCTSsol mutate(EMCTSsol sol);
+
+    Solution mutate(Solution sol);
+    void combine_and_sort_population(Solution child, Solution parent);
 }

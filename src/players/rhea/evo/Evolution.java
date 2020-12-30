@@ -18,6 +18,7 @@ public class Evolution {
 
     private int nIterations;
     private Individual[] population;
+    //private Individual population;
 
     private GameInterface gInterface;
 
