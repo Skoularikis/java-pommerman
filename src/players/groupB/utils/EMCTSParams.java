@@ -20,6 +20,7 @@ public class EMCTSParams implements ParameterSet {
     private int genetic_operator = Const.GeneticOperators.MUTATION_ONLY;
     //Evaluate
     private int evaluate_update = Const.Evaluation.EVALUATE_UPDATE_AVERAGE;
+    private int evaluate_act = Const.Evaluation.EVALUATE_ACT_LAST;
 
     private int mutation_type = MUTATION_UNIFORM;
     private int budget_type = 1;

@@ -15,6 +15,7 @@ import players.rhea.evo.Individual;
 import utils.ElapsedCpuTimer;
 import utils.Types;
 import utils.Utils;
+import utils.Vector2d;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -34,7 +35,7 @@ public class Emcts implements GamePlayable {
     // Random Generator
     private Random randomGenerator;
     // GameState
-    public GameState gameState;
+    public GameState rootGameState;
     // EMCTSsol
     public EMCTSsol currentRootStateSolution;
 
@@ -47,16 +48,18 @@ public class Emcts implements GamePlayable {
         this.mctsOperations = new MctsOperations(this.randomGenerator, this.elapsedTimer);
         //Initialize EvoOperations
         this.evoOperations = new EvoOperations(this.randomGenerator, this.elapsedTimer);
+        //set mcts operations to evo
+        this.evoOperations.setMcts(this.mctsOperations);
     }
 
     @Override
     public void setRootState(GameState gameState, Solution currentRootState) {
-        this.gameState = gameState;
+        this.rootGameState = gameState;
         this.mctsOperations.setParamsHelper(gameState, this.params);
         this.evoOperations.setParamsHelper(gameState, this.params);
         if (currentRootState == null) { // Root of the tree
             ParamsHelper paramsHelper = evoOperations.getParamsHelper();
-            this.currentRootStateSolution = createRootStateSolutionWithGreedyAction(gameState, paramsHelper);
+            this.currentRootStateSolution = createRootStateSolutionWithGreedyAction(paramsHelper);
         }
         else { // Leaf node
             this.currentRootStateSolution = (EMCTSsol) currentRootState;
@@ -83,7 +86,7 @@ public class Emcts implements GamePlayable {
     }
 
 
-    private EMCTSsol createRootStateSolutionWithGreedyAction(GameState gs, ParamsHelper paramsHelper) {
+    private EMCTSsol createRootStateSolutionWithGreedyAction(ParamsHelper paramsHelper) {
         EMCTSsol rootSolution = new EMCTSsol();
         rootSolution.setPopulation(
                 new Individual(
@@ -91,8 +94,8 @@ public class Emcts implements GamePlayable {
                         randomGenerator,
                         getAvailableActions().size()));
         int depth = 0;
-        GameState gameState = gs.copy();
-        while (!this.mctsOperations.finishRollout(gameState,depth)) {
+        GameState gameState = this.rootGameState.copy();
+        while (!this.mctsOperations.finishRollout(this.rootGameState, depth)) {
             double maxQ = Double.NEGATIVE_INFINITY;
             Types.ACTIONS bestAction = null;
             GameState currentBestGameSate = null;
@@ -105,11 +108,13 @@ public class Emcts implements GamePlayable {
                 if (Q > maxQ) {
                     maxQ = Q;
                     bestAction = act;
-                    currentBestGameSate = gs;
+                    currentBestGameSate = gsCopy;
                 }
             }
             rootSolution.getPopulation().set_action(depth, getAvailableActionsInArrayList().indexOf(bestAction));
             depth++;
+            int v = gameState.getTick();
+            int d = currentBestGameSate.getTick();
             gameState = currentBestGameSate;
         }
         return rootSolution;

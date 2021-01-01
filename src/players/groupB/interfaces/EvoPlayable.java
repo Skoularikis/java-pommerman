@@ -13,5 +13,7 @@ public interface EvoPlayable {
     double evaluate(Solution rootSol, boolean useMutationClass);
 
     Solution mutate(Solution sol);
-    void combine_and_sort_population(Solution child, Solution parent);
+
+    //Helpers
+    void setMcts(MctsPlayable mctsPlayable);
 }

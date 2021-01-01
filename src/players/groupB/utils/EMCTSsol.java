@@ -6,9 +6,8 @@ import java.util.ArrayList;
 public class EMCTSsol extends Solution {
 
     private EMCTSsol parent;
-    //private Individual[] population;
     private Individual population;
-    private ArrayList<EMCTSsol> children;
+    private ArrayList<EMCTSsol> children = new ArrayList<EMCTSsol>();
     private double[] bounds = new double[]{Double.MAX_VALUE, -Double.MAX_VALUE};
 
     public double[] getBounds() {

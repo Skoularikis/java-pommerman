@@ -49,7 +49,7 @@ public class ActionsHelper {
             int x = pos.x + dir.x;
             int y = pos.y + dir.y;
 
-            if (x < 0 && x >= width && y < 0 && y >= height)
+            if (x < 0 && x < width && y < 0 && y < height)
                 actionsToTry.remove(nAction);
         }
         return actionsToTry;
