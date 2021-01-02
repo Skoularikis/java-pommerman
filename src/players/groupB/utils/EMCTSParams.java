@@ -16,6 +16,9 @@ public class EMCTSParams implements ParameterSet {
     //FM budget
     public int fm_budget = Const.BudgetType.FM_BUDGET;
 
+    // player ID
+    private int playerID;
+
     //Genetic Operator
     private int genetic_operator = Const.GeneticOperators.MUTATION_ONLY;
     //Evaluate
@@ -34,6 +37,7 @@ public class EMCTSParams implements ParameterSet {
     private int gene_size = 1;
     private int mutation_gene_count = 1;
     private boolean elitism = false;
+
 
     private int time_budget = 40;
 
@@ -84,6 +88,12 @@ public class EMCTSParams implements ParameterSet {
             case "elitism":
                 elitism = (boolean) value;
                 break;
+            case "evaluate_act":
+                evaluate_act = (int) value;
+                break;
+            case "playerID":
+                playerID = (int) value;
+                break;
 
         }
     }
@@ -119,6 +129,10 @@ public class EMCTSParams implements ParameterSet {
                 return mutation_gene_count;
             case "elitism":
                 return elitism;
+            case "evaluate_act":
+                return evaluate_act;
+            case "playerID":
+                return playerID;
         }
         return null;
     }

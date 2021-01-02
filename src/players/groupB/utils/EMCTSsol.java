@@ -1,4 +1,6 @@
 package players.groupB.utils;
+import core.GameState;
+import players.heuristics.StateHeuristic;
 import players.rhea.evo.Individual;
 
 import java.util.ArrayList;
@@ -9,6 +11,7 @@ public class EMCTSsol extends Solution {
     private Individual population;
     private ArrayList<EMCTSsol> children = new ArrayList<EMCTSsol>();
     private double[] bounds = new double[]{Double.MAX_VALUE, -Double.MAX_VALUE};
+
 
     public double[] getBounds() {
         return bounds;
@@ -45,6 +48,7 @@ public class EMCTSsol extends Solution {
     public void setChildren(ArrayList<EMCTSsol> children) {
         this.children = children;
     }
+
 
 
     public EMCTSsol copy() {

@@ -41,6 +41,7 @@ public class EMCTSPlayer extends ParameterizedPlayer {
             this.params = new EMCTSParams();
             super.setParameters(this.params);
         }
+        this.params.setParameterValue("playerID", playerID - Types.TILETYPE.AGENT0.getKey());
         // Set up random generator
         this.randomGenerator = new Random(seed);
         // Root of the tree

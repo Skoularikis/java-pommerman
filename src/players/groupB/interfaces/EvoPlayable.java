@@ -1,6 +1,7 @@
 package players.groupB.interfaces;
 
 import core.GameState;
+import players.groupB.emcts.Mutate;
 import players.groupB.helpers.ParamsHelper;
 import players.groupB.utils.Solution;
 import players.optimisers.ParameterSet;
@@ -10,7 +11,7 @@ public interface EvoPlayable {
     Solution createRootStateSolution(boolean isRootState);
     void setParamsHelper(GameState gameState, ParameterSet params);
     ParamsHelper getParamsHelper();
-    double evaluate(Solution rootSol, boolean useMutationClass);
+    double evaluate(Solution rootSol, Mutate useMutationClass, int evaluation_update);
 
     Solution mutate(Solution sol);
 
