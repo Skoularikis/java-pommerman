@@ -57,7 +57,7 @@ public class Mutate {
     private TIntHashSet uniform_mutation() {
         TIntHashSet genesToMutate = new TIntHashSet();
         for (int i = 0; i < nGenes; i++) {
-            if (random.nextFloat() < params.getIntValue("mutation_rate")) {
+            if (random.nextFloat() < params.getDoubleValue("mutation_rate")) {
                 genesToMutate.add(i);
             }
         }

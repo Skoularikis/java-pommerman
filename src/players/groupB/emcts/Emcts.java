@@ -50,6 +50,7 @@ public class Emcts implements GamePlayable {
         this.evoOperations = new EvoOperations(this.randomGenerator, this.elapsedTimer);
         //set mcts operations to evo
         this.evoOperations.setMcts(this.mctsOperations);
+        this.mctsOperations.setEvoPlayable(this.evoOperations);
     }
 
     @Override
@@ -65,22 +66,28 @@ public class Emcts implements GamePlayable {
             this.currentRootStateSolution = (EMCTSsol) currentRootState;
         }
 
+//        ArrayList<Individual> pd = new ArrayList<Individual>();
+//        for (int i=0; i<6; i++) {
+//            EMCTSsol hela = (EMCTSsol)this.evoOperations.mutate(this.currentRootStateSolution);
+//            pd.add(hela.getPopulation());
+//        }
+//        System.out.println(pd);
 
-        Solution hela = this.evoOperations.mutate(this.currentRootStateSolution);
-
-        System.out.println(hela);
+//
+//        System.out.println(hela);
     }
 
     @Override
     public void getActionToExecute(boolean isRootState) {
-
+        EMCTSsol curSol = this.currentRootStateSolution.copy();
         boolean stop = false;
         while (!stop) {
-            EMCTSsol curSol = this.currentRootStateSolution.copy();
+
+            //Change the current State to the best child
             EMCTSsol selected = (EMCTSsol)mctsOperations.treePolicy(curSol);
-            double evalValue = evoOperations.evaluate(selected, true);
+            double evalValue = evoOperations.evaluate(selected);
             this.mctsOperations.backUp(selected, evalValue);
-            stop = true;
+//            stop = true;
         }
 //        this.currentRootStateSolution = selectedSolution;
     }

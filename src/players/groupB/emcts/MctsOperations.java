@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+import static players.groupB.helpers.ActionsHelper.getAvailableActionsInArrayList;
+
 public class MctsOperations implements MctsPlayable {
     // Elapsed Timer
     private ElapsedCpuTimer elapsedTimer;
@@ -35,16 +37,17 @@ public class MctsOperations implements MctsPlayable {
     @Override
     public Solution treePolicy(Solution sol) {
         EMCTSsol cur = (EMCTSsol)sol;
-//&& cur.m_depth < params.rollout_depth
-        while (!this.gameState.isTerminal())
+        while (!notFullyExpanded(cur))
         {
-            if (notFullyExpanded(cur)) {
-                return expand(cur);
-
-            } else {
-                cur = (EMCTSsol)uct(cur);;
-            }
+            return this.evoOperations.mutate(cur);
+//            if (!notFullyExpanded(cur)) {
+//
+//
+//            } else {
+//                cur = (EMCTSsol)uct(cur);;
+//            }
         }
+        cur = (EMCTSsol) uct(cur);
         return cur;
     }
 
@@ -160,7 +163,7 @@ public class MctsOperations implements MctsPlayable {
     public boolean notFullyExpanded(Solution solution) {
         EMCTSsol emctSsol = (EMCTSsol)solution;
         for (EMCTSsol sol : emctSsol.getChildren()) {
-            if (sol.getVisited_count() == 0) {
+            if (sol != null && emctSsol.getChildren().size() == getAvailableActionsInArrayList().size()) {
                 return true;
             }
         }

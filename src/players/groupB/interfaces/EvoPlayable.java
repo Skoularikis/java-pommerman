@@ -11,7 +11,7 @@ public interface EvoPlayable {
     Solution createRootStateSolution(boolean isRootState);
     void setParamsHelper(GameState gameState, ParameterSet params);
     ParamsHelper getParamsHelper();
-    double evaluate(Solution rootSol, Mutate useMutationClass, int evaluation_update);
+    double evaluate(Solution rootSol);
 
     Solution mutate(Solution sol);
 

@@ -29,7 +29,7 @@ public class EMCTSParams implements ParameterSet {
     private int budget_type = 1;
     private int individual_length = 12;
     private int iteration_budget = 200;
-    private double mutation_rate = 0.5;
+    private double mutation_rate = 0.1;
     private int heuristic_method = Const.Heuristics.CUSTOM_HEURISTIC;
     private int tree_depth = 8;
     private boolean shift_buffer = true;

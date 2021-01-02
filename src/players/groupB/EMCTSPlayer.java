@@ -53,11 +53,7 @@ public class EMCTSPlayer extends ParameterizedPlayer {
     @Override
     public Types.ACTIONS act(GameState gs) {
         gamePlayable.setRootState(gs, this.currentSolution);
-
-
-//        gamePlayable.getActionToExecute(this.isRootState);
-
-
+        gamePlayable.getActionToExecute(this.isRootState);
         this.isRootState = false;
         return null;
     }
