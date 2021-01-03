@@ -7,47 +7,37 @@ import players.groupB.interfaces.MctsPlayable;
 import players.groupB.utils.Const;
 import players.groupB.utils.EMCTSsol;
 import players.groupB.utils.Solution;
-import players.mcts.SingleTreeNode;
 import players.optimisers.ParameterSet;
-import utils.ElapsedCpuTimer;
 import utils.Types;
 import utils.Utils;
-import utils.Vector2d;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Random;
 
 import static players.groupB.helpers.ActionsHelper.getAvailableActionsInArrayList;
 
 public class MctsOperations implements MctsPlayable {
-    // Elapsed Timer
-    private ElapsedCpuTimer elapsedTimer;
     private ParamsHelper paramsHelper;
     private Random randomGenerator;
     private GameState gameState;
     //For Evo Operations
     private EvoPlayable evoOperations;
 
-    public MctsOperations(Random randomGenerator, ElapsedCpuTimer elapsedTimer) {
+    public MctsOperations(Random randomGenerator) {
         this.randomGenerator = randomGenerator;
-        this.elapsedTimer = elapsedTimer;
     }
 
     @Override
     public Solution treePolicy(Solution sol) {
         EMCTSsol cur = (EMCTSsol)sol;
-        while (!notFullyExpanded(cur))
+        //find stop
+        while (!this.gameState.isTerminal())
         {
-            return this.evoOperations.mutate(cur);
-//            if (!notFullyExpanded(cur)) {
-//
-//
-//            } else {
-//                cur = (EMCTSsol)uct(cur);;
-//            }
+            if (!notFullyExpanded(cur)) {
+                return this.evoOperations.mutate(cur);
+            } else {
+                cur = (EMCTSsol)uct(cur);;
+            }
         }
-        cur = (EMCTSsol) uct(cur);
         return cur;
     }
 
@@ -181,6 +171,7 @@ public class MctsOperations implements MctsPlayable {
         if (this.paramsHelper == null){
             this.paramsHelper = new ParamsHelper(gameState, params, this.randomGenerator);
             this.paramsHelper.setUpSuitableHeuristic(this.paramsHelper.getIntValue("heuristic_method"));
+            this.paramsHelper.initializeBudgets();
         }
     }
 

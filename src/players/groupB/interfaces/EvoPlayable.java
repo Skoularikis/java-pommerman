@@ -1,7 +1,6 @@
 package players.groupB.interfaces;
 
 import core.GameState;
-import players.groupB.emcts.Mutate;
 import players.groupB.helpers.ParamsHelper;
 import players.groupB.utils.Solution;
 import players.optimisers.ParameterSet;

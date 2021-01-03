@@ -13,37 +13,47 @@ import static players.rhea.utils.Constants.*;
 
 
 public class EMCTSParams implements ParameterSet {
-    //FM budget
+    //Budgets
+    private int budget_type = Const.BudgetType.ITERATION_BUDGET;
     public int fm_budget = Const.BudgetType.FM_BUDGET;
-
+    private int time_budget = 40;
     // player ID
     private int playerID;
-
     //Genetic Operator
     private int genetic_operator = Const.GeneticOperators.MUTATION_ONLY;
+    private int mutation_type = Const.GeneticOperators.MUTATION_UNIFORM;
     //Evaluate
     private int evaluate_update = Const.Evaluation.EVALUATE_UPDATE_AVERAGE;
     private int evaluate_act = Const.Evaluation.EVALUATE_ACT_LAST;
+    //Rollout depth
+    private int rollout_depth = 8;
+    //Init Type
+    private int init_type = Const.InitType.INIT_RANDOM;
+    //Heuristic Class to use
+    private int heuristic_method = Const.Heuristics.CUSTOM_HEURISTIC;
 
-    private int mutation_type = MUTATION_UNIFORM;
-    private int budget_type = 1;
+
     private int individual_length = 12;
     private int iteration_budget = 200;
     private double mutation_rate = 0.1;
-    private int heuristic_method = Const.Heuristics.CUSTOM_HEURISTIC;
+
     private int tree_depth = 8;
     private boolean shift_buffer = true;
-    private int init_type = Const.InitType.INIT_RANDOM;
+
     private int gene_size = 1;
     private int mutation_gene_count = 1;
     private boolean elitism = false;
 
 
-    private int time_budget = 40;
+
 
     @Override
     public void setParameterValue(String name, Object value) {
         switch(name) {
+            case "time_budget":
+                time_budget = (int)value;
+            case "rollout_depth":
+                rollout_depth = (int)value;
             case "evaluate_update":
                 evaluate_update = (int)value;
             case "genetic_operator":
@@ -101,6 +111,10 @@ public class EMCTSParams implements ParameterSet {
     @Override
     public Object getParameterValue(String root) {
         switch(root) {
+            case "time_budget":
+                return time_budget;
+            case "rollout_depth":
+                return rollout_depth;
             case "evaluate_update":
                 return evaluate_update;
             case "genetic_operator":

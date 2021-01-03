@@ -1,7 +1,6 @@
 package players.groupB.emcts;
 
 import core.GameState;
-import players.groupB.helpers.ObjectHelper;
 import players.groupB.helpers.ParamsHelper;
 import players.groupB.interfaces.EvoPlayable;
 import players.groupB.interfaces.GamePlayable;
@@ -12,20 +11,16 @@ import players.groupB.utils.EMCTSsol;
 import players.groupB.utils.Solution;
 import players.optimisers.ParameterSet;
 import players.rhea.evo.Individual;
-import utils.ElapsedCpuTimer;
 import utils.Types;
 import utils.Utils;
-import utils.Vector2d;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import static players.groupB.helpers.ActionsHelper.*;
 
-
 public class Emcts implements GamePlayable {
-    //CPU Timer
-    private ElapsedCpuTimer elapsedTimer;
+    //paramsHelper
+    private ParamsHelper paramsHelper;
     // For MCTS part
     private MctsPlayable mctsOperations;
     // For Evo part
@@ -43,55 +38,113 @@ public class Emcts implements GamePlayable {
         //Set up EMCTS parameters
         this.params = (EMCTSParams)params;
         this.randomGenerator = randomGenerator;
-        setUpElapsedCpuTimer(this.params);
-        //Initialize MctsOperations
-        this.mctsOperations = new MctsOperations(this.randomGenerator, this.elapsedTimer);
-        //Initialize EvoOperations
-        this.evoOperations = new EvoOperations(this.randomGenerator, this.elapsedTimer);
-        //set mcts operations to evo
+        this.mctsOperations = new MctsOperations(this.randomGenerator);
+        this.evoOperations = new EvoOperations(this.randomGenerator);
         this.evoOperations.setMcts(this.mctsOperations);
         this.mctsOperations.setEvoPlayable(this.evoOperations);
+
     }
 
     @Override
     public void setRootState(GameState gameState, Solution currentRootState) {
         this.rootGameState = gameState;
+
+
         this.mctsOperations.setParamsHelper(gameState, this.params);
         this.evoOperations.setParamsHelper(gameState, this.params);
-        if (currentRootState == null) { // Root of the tree
-            ParamsHelper paramsHelper = evoOperations.getParamsHelper();
-            this.currentRootStateSolution = createRootStateSolutionWithGreedyAction(paramsHelper);
-        }
-        else { // Leaf node
-            this.currentRootStateSolution = (EMCTSsol) currentRootState;
-        }
 
-//        ArrayList<Individual> pd = new ArrayList<Individual>();
-//        for (int i=0; i<6; i++) {
-//            EMCTSsol hela = (EMCTSsol)this.evoOperations.mutate(this.currentRootStateSolution);
-//            pd.add(hela.getPopulation());
-//        }
-//        System.out.println(pd);
+        this.paramsHelper = evoOperations.getParamsHelper();
 
+        this.currentRootStateSolution = createRootStateSolutionWithGreedyAction(this.paramsHelper);
+
+//        if (currentRootState == null) { // Root of the tree
 //
-//        System.out.println(hela);
+//        }
+//        else { // Leaf node
+//            this.currentRootStateSolution = (EMCTSsol) currentRootState;
+//        }
     }
 
     @Override
-    public void getActionToExecute(boolean isRootState) {
-        EMCTSsol curSol = this.currentRootStateSolution.copy();
+    public void getActionToExecute() {
         boolean stop = false;
+        int numIters = 0;
         while (!stop) {
-
-            //Change the current State to the best child
+            EMCTSsol curSol = this.currentRootStateSolution.copy();
             EMCTSsol selected = (EMCTSsol)mctsOperations.treePolicy(curSol);
             double evalValue = evoOperations.evaluate(selected);
             this.mctsOperations.backUp(selected, evalValue);
-//            stop = true;
+            if (numIters == 10) {
+                stop = true;
+            }
+            else{
+                numIters++;
+            }
         }
-//        this.currentRootStateSolution = selectedSolution;
     }
 
+    @Override
+    public Solution getBestSolution() {
+        int selected = -1;
+        double bestValue = -Double.MAX_VALUE;
+        boolean allEqual = true;
+        double first = -1;
+
+        for (int i=0; i<this.currentRootStateSolution.getChildren().size(); i++) {
+            EMCTSsol child = this.currentRootStateSolution.getChildren().get(i);
+            if(child != null)
+            {
+                if(first == -1)
+                    first = child.getVisited_count();
+                else if(first != child.getVisited_count())
+                {
+                    allEqual = false;
+                }
+
+                double childValue = child.getVisited_count();
+                childValue = Utils.noise(childValue, Const.epsilon, this.randomGenerator.nextDouble());     //break ties randomly
+                if (childValue > bestValue) {
+                    bestValue = childValue;
+                    selected = i;
+                }
+            }
+        }
+        if (selected == -1)
+        {
+            selected = 0;
+        }else if(allEqual)
+        {
+            //If all are equal, we opt to choose for the one with the best Q.
+            selected = bestAction();
+        }
+        return this.currentRootStateSolution.getChildren().get(selected);
+//        return getAvailableActionsInArrayList().get(actionToExecute);
+    }
+
+    private int bestAction() {
+        int selected = -1;
+        double bestValue = -Double.MAX_VALUE;
+
+        for (int i=0; i<this.currentRootStateSolution.getChildren().size(); i++) {
+            EMCTSsol child = this.currentRootStateSolution.getChildren().get(i);
+            if(child != null) {
+                double childValue = child.getPopulation().get_value() / (child.getVisited_count() + Const.epsilon);
+                childValue = Utils.noise(childValue, Const.epsilon, this.randomGenerator.nextDouble());     //break ties randomly
+                if (childValue > bestValue) {
+                    bestValue = childValue;
+                    selected = i;
+                }
+            }
+        }
+
+        if (selected == -1)
+        {
+            System.out.println("Unexpected selection!");
+            selected = 0;
+        }
+
+        return selected;
+    }
 
     private EMCTSsol createRootStateSolutionWithGreedyAction(ParamsHelper paramsHelper) {
         EMCTSsol rootSolution = new EMCTSsol();
@@ -120,20 +173,9 @@ public class Emcts implements GamePlayable {
             }
             rootSolution.getPopulation().set_action(depth, getAvailableActionsInArrayList().indexOf(bestAction));
             depth++;
-            int v = gameState.getTick();
-            int d = currentBestGameSate.getTick();
             gameState = currentBestGameSate;
         }
         return rootSolution;
-    }
-
-    private void setUpElapsedCpuTimer(EMCTSParams params) {
-        ElapsedCpuTimer elapsedTimer = null;
-        if (ObjectHelper.getIntValue(params.getParameterValue("budget_type")) == Const.BudgetType.TIME_BUDGET) {
-            elapsedTimer = new ElapsedCpuTimer();
-            elapsedTimer.setMaxTimeMillis(ObjectHelper.getIntValue(params.getParameterValue("time_budget")));
-        }
-        this.elapsedTimer = elapsedTimer;
     }
 }
 

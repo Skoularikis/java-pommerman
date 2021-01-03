@@ -7,12 +7,16 @@ import players.heuristics.*;
 import java.util.Random;
 
 import players.optimisers.ParameterSet;
+import players.rhea.utils.FMBudget;
+import utils.ElapsedCpuTimer;
 
 import static players.rhea.utils.Constants.*;
 import static players.rhea.utils.Constants.WIN_SCORE_HEURISTIC;
 
 public class ParamsHelper {
 
+    private ElapsedCpuTimer elapsedTimer;
+    private FMBudget fmBudget;
     private GameState gameState;
     private Random randomGenerator;
     private StateHeuristic stateHeuristic;
@@ -60,6 +64,52 @@ public class ParamsHelper {
 
     public boolean getBooleanValue(String name){
         return ObjectHelper.getBooleanValue(this.params.getParameterValue(name));
+    }
+
+
+    public ElapsedCpuTimer getElapsedTimer() {
+        return elapsedTimer;
+    }
+
+    public FMBudget getFmBudget() {
+        return fmBudget;
+    }
+
+    public void initializeBudgets() {
+        this.elapsedTimer = new ElapsedCpuTimer();
+        this.elapsedTimer.setMaxTimeMillis(getIntValue("time_budget"));
+        this.fmBudget = new FMBudget(getIntValue("fm_budget") );
+        this.fmBudget.reset();
+    }
+
+    public boolean gotBudget(int iterationsRemaining) {
+        boolean gotBudget = true;
+        int budget_type = getIntValue("budget_type");
+        if (budget_type == Const.BudgetType.TIME_BUDGET) {
+            gotBudget = this.elapsedTimer.enoughBudgetIteration(break_ms);
+        } else if (budget_type == Const.BudgetType.ITERATION_BUDGET) {
+            gotBudget = iterationsRemaining > 0;
+        } else if (budget_type == Const.BudgetType.FM_BUDGET) {
+            if (fmBudget != null) {
+                gotBudget = fmBudget.enoughBudgetIteration();
+            } else {
+                gotBudget = this.fmBudget.enoughBudgetIteration();
+            }
+        }
+        return gotBudget;
+    }
+
+    public void endIteration() {
+        int budget_type = getIntValue("budget_type");
+        if (budget_type == TIME_BUDGET) {
+            this.elapsedTimer.endIteration();
+        } else if (budget_type == FM_BUDGET) {
+            if (fmBudget != null) {
+                fmBudget.endIteration();
+            } else {
+                this.fmBudget.endIteration();
+            }
+        }
     }
 
 }

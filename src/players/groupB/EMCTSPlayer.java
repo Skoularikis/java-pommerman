@@ -10,8 +10,11 @@ import players.groupB.utils.EMCTSsol;
 import players.groupB.utils.Solution;
 import players.optimisers.ParameterSet;
 import players.optimisers.ParameterizedPlayer;
+import utils.ElapsedCpuTimer;
 import utils.Types;
 import java.util.Random;
+
+import static players.groupB.helpers.ActionsHelper.getAvailableActionsInArrayList;
 
 
 public class EMCTSPlayer extends ParameterizedPlayer {
@@ -19,8 +22,7 @@ public class EMCTSPlayer extends ParameterizedPlayer {
     private ParameterSet params;
     private GamePlayable gamePlayable;
     private Random randomGenerator;
-    private Solution currentSolution;
-    private boolean isRootState = true;
+    private Solution currentSolution = null;
 
     protected EMCTSPlayer(long seed, int pId) {
         super(seed, pId);
@@ -44,18 +46,22 @@ public class EMCTSPlayer extends ParameterizedPlayer {
         this.params.setParameterValue("playerID", playerID - Types.TILETYPE.AGENT0.getKey());
         // Set up random generator
         this.randomGenerator = new Random(seed);
-        // Root of the tree
-        gamePlayable = new Emcts(this.params, this.randomGenerator);
-
-;
     }
 
     @Override
     public Types.ACTIONS act(GameState gs) {
+        // Root of the tree
+        gamePlayable = new Emcts(this.params, this.randomGenerator);
+        // Initialize Current Root Solution
         gamePlayable.setRootState(gs, this.currentSolution);
-        gamePlayable.getActionToExecute(this.isRootState);
-        this.isRootState = false;
-        return null;
+        // Play Action
+        gamePlayable.getActionToExecute();
+        // get Best/Most Visited action
+        EMCTSsol bestSolution = (EMCTSsol)gamePlayable.getBestSolution();
+
+        this.currentSolution = bestSolution;
+
+        return getAvailableActionsInArrayList().get(bestSolution.getPopulation().get_action(0));
     }
 
     @Override

@@ -1,32 +1,24 @@
 package players.groupB.emcts;
 
-import core.Game;
 import core.GameState;
-import gnu.trove.set.hash.TIntHashSet;
 import players.groupB.helpers.ParamsHelper;
 import players.groupB.interfaces.EvoPlayable;
 import players.groupB.interfaces.MctsPlayable;
 import players.groupB.utils.Const;
 import players.groupB.utils.EMCTSsol;
 import players.groupB.utils.Solution;
-import players.heuristics.StateHeuristic;
 import players.optimisers.ParameterSet;
 import players.rhea.evo.Individual;
-import players.rhea.evo.Mutation;
-import players.rhea.utils.FMBudget;
 import utils.ElapsedCpuTimer;
 import utils.Types;
 import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Random;
 
 import static players.groupB.helpers.ActionsHelper.*;
-import static players.groupB.helpers.ActionsHelper.getSafeRandomActions;
 import static players.rhea.utils.Constants.*;
-import static players.rhea.utils.Constants.EVALUATE_UPDATE_RAW;
 import static players.rhea.utils.Utilities.*;
 
 public class EvoOperations implements EvoPlayable {
@@ -38,15 +30,9 @@ public class EvoOperations implements EvoPlayable {
     private GameState gameState;
     private Mutate mutationClass;
     private MctsPlayable mctsOperations;
-    private HashMap<Integer, Types.ACTIONS> action_mapping;
-    private StateHeuristic stateHeuristic;
-    private int evaluate_act = EVALUATE_ACT_LAST;
-    private FMBudget fmBudget;
 
-
-    public EvoOperations(Random randomGenerator, ElapsedCpuTimer elapsedTimer) {
+    public EvoOperations(Random randomGenerator) {
         this.randomGenerator = randomGenerator;
-        this.elapsedTimer = elapsedTimer;
     }
 
     @Override
@@ -56,7 +42,7 @@ public class EvoOperations implements EvoPlayable {
             this.paramsHelper = new ParamsHelper(gameState, params, this.randomGenerator);
             this.paramsHelper.setUpSuitableHeuristic(this.paramsHelper.getIntValue("heuristic_method"));
             this.mutationClass = new Mutate(this.paramsHelper, this.randomGenerator);
-            this.fmBudget = new FMBudget(this.paramsHelper.getIntValue("fm_budget") );
+            this.paramsHelper.initializeBudgets();
         }
     }
 
@@ -205,7 +191,7 @@ public class EvoOperations implements EvoPlayable {
                 //}
 
                 // Signal we used 1 FM call
-                this.fmBudget.use();
+                this.paramsHelper.getFmBudget().use();
 
                 // Save the value of this state in the values array and update lastIdx reached.
                 if ((this.paramsHelper.getIntValue("evaluate_act") == EVALUATE_ACT_DELTA || this.paramsHelper.getIntValue("evaluate_act") == EVALUATE_ACT_LAST)
