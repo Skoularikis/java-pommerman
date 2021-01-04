@@ -34,55 +34,6 @@ public class EvoOperations implements EvoPlayable {
     public EvoOperations(Random randomGenerator) {
         this.randomGenerator = randomGenerator;
     }
-
-    @Override
-    public void setParamsHelper(GameState gameState, ParameterSet params) {
-        this.gameState = gameState;
-        if (this.paramsHelper == null){
-            this.paramsHelper = new ParamsHelper(gameState, params, this.randomGenerator);
-            this.paramsHelper.setUpSuitableHeuristic(this.paramsHelper.getIntValue("heuristic_method"));
-            this.mutationClass = new Mutate(this.paramsHelper, this.randomGenerator);
-            this.paramsHelper.initializeBudgets();
-        }
-    }
-
-    @Override
-    public ParamsHelper getParamsHelper() {
-        return this.paramsHelper;
-    }
-
-    @Override
-    public EMCTSsol createRootStateSolution(boolean isRootState) {
-        rootStateSolution = new EMCTSsol();
-        if (isRootState){
-            rootStateSolution.setParent(null);
-        }
-        if (rootStateSolution.getPopulation() == null){
-            rootStateSolution.setPopulation(
-                    new Individual(
-                            this.paramsHelper.getIntValue("individual_length"),
-                            randomGenerator,
-                            getAvailableActions().size())
-            );
-            if (this.paramsHelper.getIntValue("init_type") == Const.InitType.INIT_RANDOM) {
-                if (isRootState){
-                    fillIndividualWithRandomActions(rootStateSolution.getPopulation(),randomGenerator);
-                }
-                rootStateSolution.setChildren(new ArrayList<EMCTSsol>());
-                for (int i=0; i < getAvailableActions().size(); i++) {
-                    EMCTSsol child = new EMCTSsol();
-                    child.setParent(rootStateSolution);
-                    rootStateSolution.getChildren().add(child);
-                }
-
-            }
-            return rootStateSolution;
-        }
-        return null;
-    }
-
-
-
     @Override
     public Solution mutate(Solution ch){
         EMCTSsol parent = (EMCTSsol)ch;
@@ -140,6 +91,16 @@ public class EvoOperations implements EvoPlayable {
         return child;
     }
 
+    @Override
+    public Solution shift_buffer(Solution solution) {
+        EMCTSsol sol = (EMCTSsol) solution;
+        for (int j = 1; j < sol.getPopulation().get_length(); j++) {
+            sol.getPopulation().set_action(j - 1, sol.getPopulation().get_action(j));
+        }
+        sol.getPopulation().set_action(sol.getPopulation().get_length()-1, this.randomGenerator.nextInt(getAvailableActionsInArrayList().size()));
+        return sol;
+    }
+
     private EMCTSsol initializeChildFromParent(EMCTSsol parent) {
         EMCTSsol child = new EMCTSsol();
         child.setPopulation(parent.getPopulation().copy());
@@ -180,15 +141,7 @@ public class EvoOperations implements EvoPlayable {
                     // Advance the state with the action in the individual
                     this.mctsOperations.roll(copy, getAvailableActionsInArrayList().get(child.getPopulation().get_action(i)));
 
-                } //else {  // No individual passed, doing random rollout
-                  //  ArrayList<Types.ACTIONS> acts = Types.ACTIONS.all();
-                  //  int bound = rootStateSolution;
-                  //  Types.ACTIONS action = Types.ACTIONS.ACTION_STOP;
-                  //  if (bound > 0) {
-                  //      action = acts.get(random.nextInt(bound));
-                  //  }
-                  //  advanceState(copy, action);
-                //}
+                }
 
                 // Signal we used 1 FM call
                 this.paramsHelper.getFmBudget().use();
@@ -290,6 +243,23 @@ public class EvoOperations implements EvoPlayable {
     public void setMcts(MctsPlayable mctsPlayable) {
         this.mctsOperations = mctsPlayable;
     }
+
+    @Override
+    public void setParamsHelper(GameState gameState, ParameterSet params) {
+        this.gameState = gameState;
+        if (this.paramsHelper == null){
+            this.paramsHelper = new ParamsHelper(gameState, params, this.randomGenerator);
+            this.paramsHelper.setUpSuitableHeuristic(this.paramsHelper.getIntValue("heuristic_method"));
+            this.mutationClass = new Mutate(this.paramsHelper, this.randomGenerator);
+            this.paramsHelper.initializeBudgets();
+        }
+    }
+
+    @Override
+    public ParamsHelper getParamsHelper() {
+        return this.paramsHelper;
+    }
+
 
 
 }

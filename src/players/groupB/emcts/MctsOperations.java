@@ -30,12 +30,12 @@ public class MctsOperations implements MctsPlayable {
     public Solution treePolicy(Solution sol) {
         EMCTSsol cur = (EMCTSsol)sol;
         //find stop
-        while (!this.gameState.isTerminal())
+        while (!this.gameState.isTerminal() && cur.getRollout_depth() < this.paramsHelper.getIntValue("rollout_depth"))
         {
             if (!notFullyExpanded(cur)) {
                 return this.evoOperations.mutate(cur);
             } else {
-                cur = (EMCTSsol)uct(cur);;
+                cur = (EMCTSsol)uct(cur);
             }
         }
         return cur;
@@ -62,36 +62,26 @@ public class MctsOperations implements MctsPlayable {
     public Solution uct(Solution solution) {
         EMCTSsol emctSsol = (EMCTSsol)solution;
         EMCTSsol selected = null;
-        if (!this.gameState.isTerminal()) {
+        double bestValue = -Double.MAX_VALUE;
+        for (EMCTSsol child : emctSsol.getChildren()){
+            double hvVal = child.getPopulation().get_value();
+            double childValue =  hvVal / (child.getVisited_count() + Const.epsilon);
+            childValue = Utils.normalise(childValue, child.getBounds()[0], child.getBounds()[1]);
+            double uctValue = childValue +
+                    Const.K * Math.sqrt(Math.log(emctSsol.getVisited_count() + 1) / (child.getVisited_count() + Const.epsilon));
+            uctValue = Utils.noise(uctValue, Const.epsilon, this.randomGenerator.nextDouble());
+            if (uctValue > bestValue) {
+                selected = child;
+                bestValue = uctValue;
+            }
 
-            double bestValue = -Double.MAX_VALUE;
-            for (EMCTSsol child : emctSsol.getChildren()){
-                double uctValue = uctValue(child);
-                if (uctValue > bestValue) {
-                    selected = child;
-                    bestValue = uctValue;
-                }
-
-                if (selected == null)
-                {
-                    throw new RuntimeException("Warning! returning null: " + bestValue + " : " + emctSsol.getChildren().size() + " " +
-                            + emctSsol.getBounds()[0] + " " + emctSsol.getBounds()[1]);
-                }
+            if (selected == null)
+            {
+                throw new RuntimeException("Warning! returning null: " + bestValue + " : " + emctSsol.getChildren().size() + " " +
+                        + emctSsol.getBounds()[0] + " " + emctSsol.getBounds()[1]);
             }
         }
         return selected;
-    }
-
-    @Override
-    public double uctValue(Solution solution) {
-        EMCTSsol child = (EMCTSsol)solution;
-        double hvVal = child.getPopulation().get_value();
-        double childValue =  hvVal / (child.getVisited_count() + Const.epsilon);
-        childValue = Utils.normalise(childValue, child.getBounds()[0], child.getBounds()[1]);
-        double uctValue = childValue +
-                Const.K * Math.sqrt(Math.log(child.getVisited_count() + 1) / (child.getVisited_count() + Const.epsilon));
-        uctValue = Utils.noise(uctValue, Const.epsilon, this.randomGenerator.nextDouble());
-        return uctValue;
     }
 
     @Override
@@ -118,8 +108,6 @@ public class MctsOperations implements MctsPlayable {
         }
         gs.next(actionsAll);
     }
-
-
 
     @Override
     public void backUp(Solution node, double result) {
@@ -160,6 +148,8 @@ public class MctsOperations implements MctsPlayable {
         return false;
     }
 
+    //Setters
+
     @Override
     public void setEvoPlayable(EvoPlayable evoPlayable) {
         this.evoOperations = evoPlayable;
@@ -172,9 +162,7 @@ public class MctsOperations implements MctsPlayable {
             this.paramsHelper = new ParamsHelper(gameState, params, this.randomGenerator);
             this.paramsHelper.setUpSuitableHeuristic(this.paramsHelper.getIntValue("heuristic_method"));
             this.paramsHelper.initializeBudgets();
+
         }
     }
-
-
-
 }

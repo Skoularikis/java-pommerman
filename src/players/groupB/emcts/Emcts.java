@@ -9,6 +9,8 @@ import players.groupB.utils.Const;
 import players.groupB.utils.EMCTSParams;
 import players.groupB.utils.EMCTSsol;
 import players.groupB.utils.Solution;
+import players.mcts.MCTSParams;
+import players.mcts.SingleTreeNode;
 import players.optimisers.ParameterSet;
 import players.rhea.evo.Individual;
 import utils.Types;
@@ -17,6 +19,7 @@ import utils.Utils;
 import java.util.Random;
 
 import static players.groupB.helpers.ActionsHelper.*;
+import static players.groupB.helpers.ActionsHelper.getAvailableActionsInArrayList;
 
 public class Emcts implements GamePlayable {
     //paramsHelper
@@ -42,27 +45,31 @@ public class Emcts implements GamePlayable {
         this.evoOperations = new EvoOperations(this.randomGenerator);
         this.evoOperations.setMcts(this.mctsOperations);
         this.mctsOperations.setEvoPlayable(this.evoOperations);
-
     }
 
     @Override
     public void setRootState(GameState gameState, Solution currentRootState) {
         this.rootGameState = gameState;
-
-
-        this.mctsOperations.setParamsHelper(gameState, this.params);
-        this.evoOperations.setParamsHelper(gameState, this.params);
-
+        this.mctsOperations.setParamsHelper(gameState,this.params);
+        this.evoOperations.setParamsHelper(gameState,this.params);
         this.paramsHelper = evoOperations.getParamsHelper();
-
-        this.currentRootStateSolution = createRootStateSolutionWithGreedyAction(this.paramsHelper);
-
-//        if (currentRootState == null) { // Root of the tree
-//
+        if (currentRootState == null) { // Root of the tree
+            this.currentRootStateSolution = createRootStateSolutionWithGreedyAction(this.paramsHelper);
+        }
+        else { // Leaf node
+            EMCTSsol sol = (EMCTSsol)currentRootState;
+            sol.getPopulation().set_value(0);
+            this.currentRootStateSolution = new EMCTSsol();
+            this.currentRootStateSolution.setPopulation(sol.getPopulation());
+            this.currentRootStateSolution = (EMCTSsol) this.evoOperations.shift_buffer(this.currentRootStateSolution);
+//            System.out.println(this.currentRootStateSolution);
+        }
+//        ArrayList<Individual> individuals = new ArrayList<>();
+//        for (int i=0; i<6; i++) {
+//            EMCTSsol s = (EMCTSsol)this.evoOperations.mutate(this.currentRootStateSolution);
+//            individuals.add(s.getPopulation());
 //        }
-//        else { // Leaf node
-//            this.currentRootStateSolution = (EMCTSsol) currentRootState;
-//        }
+//        System.out.println(individuals);
     }
 
     @Override
@@ -74,7 +81,8 @@ public class Emcts implements GamePlayable {
             EMCTSsol selected = (EMCTSsol)mctsOperations.treePolicy(curSol);
             double evalValue = evoOperations.evaluate(selected);
             this.mctsOperations.backUp(selected, evalValue);
-            if (numIters == 10) {
+            this.currentRootStateSolution.increaseVisitedCount();
+            if (numIters == 200) {
                 stop = true;
             }
             else{
@@ -176,6 +184,28 @@ public class Emcts implements GamePlayable {
             gameState = currentBestGameSate;
         }
         return rootSolution;
+    }
+
+    public void createRootSolutionWithMCTS() {
+        MCTSParams mctsParams = new MCTSParams();
+        mctsParams.stop_type = mctsParams.STOP_ITERATIONS;
+        mctsParams.num_iterations = 200;
+        mctsParams.rollout_depth = 12;
+
+        mctsParams.heuristic_method = mctsParams.CUSTOM_HEURISTIC;
+//        SingleTreeNode m_root = new SingleTreeNode(mctsParams, this.randomGenerator, getAvailableActions().size(), getAvailableActionsInArray());
+//        m_root.setRootGameState(gs);
+//
+//        //Determine the action using MCTS...
+//        m_root.mctsSearch(ect);
+//
+//        //Determine the best action to take and return it.
+//        int action = m_root.mostVisitedAction();
+//
+//        // TODO update message memory
+//
+//        //... and return it.
+//        return actions[action];
     }
 }
 

@@ -18,6 +18,17 @@ public class ActionsHelper {
         }
     }
 
+    public static Types.ACTIONS[] getAvailableActionsInArray() {
+        ArrayList<Types.ACTIONS> actionsList = getAvailableActionsInArrayList();
+        Types.ACTIONS[] actions = new Types.ACTIONS[actionsList.size()];
+
+        int i = 0;
+        for (Types.ACTIONS act : actionsList) {
+            actions[i++] = act;
+        }
+        return actions;
+    }
+
     public static HashMap<Integer, Types.ACTIONS> getAvailableActions () {
 
         ArrayList<Types.ACTIONS> availableActions = Types.ACTIONS.all();
@@ -49,9 +60,14 @@ public class ActionsHelper {
             int x = pos.x + dir.x;
             int y = pos.y + dir.y;
 
-            if (x < 0 || y < 0 || board[y][x] == Types.TILETYPE.FLAMES) {
+            if (x < 0 || y < 0  || x > width || y > height) {
                 actionsToTry.remove(nAction);
+
             }
+            if (x >= 0 && x < width && y >= 0 && y < height)
+                if(board[y][x] == Types.TILETYPE.FLAMES) {
+                    actionsToTry.remove(nAction);
+                }
         }
         return actionsToTry;
     }

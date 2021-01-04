@@ -9,6 +9,5 @@ import utils.Types;
 public interface GamePlayable {
     void setRootState(GameState gameState, Solution currentSolution);
     void getActionToExecute();
-
     Solution getBestSolution();
 }

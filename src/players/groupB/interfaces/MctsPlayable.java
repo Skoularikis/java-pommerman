@@ -8,7 +8,6 @@ import utils.Types;
 public interface MctsPlayable {
     Solution treePolicy(Solution sol);
     Solution uct(Solution solution);
-    double uctValue(Solution solution);
 
     Solution expand(Solution cur);
 
@@ -24,6 +23,5 @@ public interface MctsPlayable {
     //Helpers
     void setEvoPlayable(EvoPlayable evoPlayable);
     void setParamsHelper(GameState gameState, ParameterSet params);
-
 
 }

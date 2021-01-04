@@ -46,22 +46,24 @@ public class EMCTSPlayer extends ParameterizedPlayer {
         this.params.setParameterValue("playerID", playerID - Types.TILETYPE.AGENT0.getKey());
         // Set up random generator
         this.randomGenerator = new Random(seed);
+        // Root of the tree
+        gamePlayable = new Emcts(this.params, this.randomGenerator);
     }
 
     @Override
     public Types.ACTIONS act(GameState gs) {
-        // Root of the tree
-        gamePlayable = new Emcts(this.params, this.randomGenerator);
         // Initialize Current Root Solution
         gamePlayable.setRootState(gs, this.currentSolution);
         // Play Action
         gamePlayable.getActionToExecute();
-        // get Best/Most Visited action
+        // get Best/Most Visited solution
         EMCTSsol bestSolution = (EMCTSsol)gamePlayable.getBestSolution();
 
         this.currentSolution = bestSolution;
 
-        return getAvailableActionsInArrayList().get(bestSolution.getPopulation().get_action(0));
+        Types.ACTIONS bestAction = getAvailableActionsInArrayList().get(bestSolution.getPopulation().get_action(0));
+
+        return bestAction;
     }
 
     @Override

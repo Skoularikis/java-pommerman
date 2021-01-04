@@ -1,5 +1,8 @@
 import core.Game;
 import players.*;
+import players.groupB.EMCTSPlayer;
+import players.groupB.utils.Const;
+import players.groupB.utils.EMCTSParams;
 import utils.Types;
 import players.rhea.utils.Constants;
 import players.mcts.MCTSPlayer;
@@ -9,6 +12,8 @@ import players.rhea.utils.RHEAParams;
 
 
 import java.util.ArrayList;
+
+import static players.groupB.utils.Const.BudgetType.ITERATION_BUDGET;
 
 public class Test {
 
@@ -37,7 +42,17 @@ public class Test {
         RHEAParams rheaParams = new RHEAParams();
         rheaParams.heurisic_type = Constants.CUSTOM_HEURISTIC;
 
-        players.add(new MCTSPlayer(seed, playerID++, mctsParams));
+        EMCTSParams emctsParams = new EMCTSParams();
+        emctsParams.setParameterValue("budget_type", ITERATION_BUDGET);
+        emctsParams.setParameterValue("iteration_budget", 200);
+        emctsParams.setParameterValue("fm_budget", 2000);
+        emctsParams.setParameterValue("individual_length", 12);
+        emctsParams.setParameterValue("heuristic_method", Const.Heuristics.CUSTOM_HEURISTIC);
+        emctsParams.setParameterValue("mutation_rate", 0.5);
+        emctsParams.setParameterValue("rollout_depth", 12);
+
+
+        players.add(new EMCTSPlayer(seed, playerID++, emctsParams));
         //players.add(new MCTSPlayer(seed, playerID++, mctsParams));
 
 //        players.add(new SimplePlayer(seed, playerID++));
