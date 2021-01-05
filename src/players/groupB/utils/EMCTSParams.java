@@ -21,7 +21,7 @@ public class EMCTSParams implements ParameterSet {
     private int playerID;
     //Genetic Operator
     private int genetic_operator = Const.GeneticOperators.MUTATION_ONLY;
-    private int mutation_type = Const.GeneticOperators.MUTATION_UNIFORM;
+    private int mutation_type = Const.GeneticOperators.MUTATION_BIAS;
     //Evaluate
     private int evaluate_update = Const.Evaluation.EVALUATE_UPDATE_AVERAGE;
     private int evaluate_act = Const.Evaluation.EVALUATE_ACT_LAST;

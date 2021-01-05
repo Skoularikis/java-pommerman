@@ -33,6 +33,7 @@ public class EvoOperations implements EvoPlayable {
     private MctsPlayable mctsOperations;
 
     public EvoOperations(Random randomGenerator) {
+
         this.randomGenerator = randomGenerator;
     }
 
@@ -46,18 +47,25 @@ public class EvoOperations implements EvoPlayable {
         return sol;
     }
 
-    @Override
-    public Solution mutate(Solution ch){
+//    @Override
+    public Solution mutation(Solution ch){
         EMCTSsol parent = (EMCTSsol)ch;
         EMCTSsol child = initializeChildFromParent(parent);
         GameState gameState = this.gameState.copy();
+        // Use Mutation Class
+
+        //
         int indexOfGenomeToChange = this.randomGenerator.nextInt(parent.getPopulation().get_length());
         int depth = 0;
         while (!this.mctsOperations.finishRollout(gameState,depth)) {
             int action = child.getPopulation().get_action(depth);
+//            this.mutationClass.findGenesToMutate();
+//            int[] mutateArray = this.mutationClass.getGenesToMutate().toArray();
+//            this.mutationClass.mutateGeneToNewValue(child.getPopulation(), mutateArray[0]);
             if (depth == indexOfGenomeToChange) {
-//                action = getDifferentRandomAction(gameState, this.randomGenerator, action);
-                action = getDifferentBestAction(gameState, action);
+                action = getDifferentRandomAction(gameState, this.randomGenerator, action);
+
+//                action = getDifferentBestAction(gameState, action);
                 child.getPopulation().set_action(indexOfGenomeToChange, action);
             }
             //Repair Policy
@@ -68,6 +76,61 @@ public class EvoOperations implements EvoPlayable {
             depth++;
         }
         return child;
+    }
+
+    @Override
+    public Solution mutate(Solution ch) {
+
+        EMCTSsol parent = (EMCTSsol)ch;
+        EMCTSsol child = initializeChildFromParent(parent);
+        GameState gameState = this.gameState.copy();
+        int indexOfChild = parent.getChildren().indexOf(child);
+        int depth = 0;
+        this.mutationClass.findGenesToMutate();
+        int[] mutateArray = this.mutationClass.getGenesToMutate().toArray();
+        while (!this.mctsOperations.finishRollout(gameState,depth)) {
+
+            if (depth == mutateArray[0]) {
+                child.getPopulation().set_action(depth,getDifferentRandomAction(gameState, this.randomGenerator, child.getPopulation().get_action(depth)));
+            }
+            if (depth > mutateArray[0]) {
+                child.getPopulation().set_action(depth,this.mctsOperations.repairPolicy(gameState, child.getPopulation().get_action(depth)));
+            }
+            this.mctsOperations.roll(gameState, getAvailableActionsInArrayList().get(child.getPopulation().get_action(depth)));
+            depth++;
+
+        }
+        for (int i = 0; i<parent.getChildren().size(); i++) {
+            EMCTSsol otherchild = parent.getChildren().get(i);
+            if (indexOfChild != i && Arrays.equals(child.getPopulation().get_actions(), otherchild.getPopulation().get_actions())) {
+                parent.getChildren().remove(child);
+                return mutate(parent);
+            }
+        }
+        return child;
+    }
+
+    private boolean checkifChildrenAreDifferent(EMCTSsol parent, int indexOfChild) {
+        if (parent.getChildren().size()>1){
+            EMCTSsol childTested = parent.getChildren().get(indexOfChild);
+            for (int i = 0; i<parent.getChildren().size(); i++) {
+                EMCTSsol child = parent.getChildren().get(i);
+                if (indexOfChild != i && Arrays.equals(child.getPopulation().get_actions(), childTested.getPopulation().get_actions())) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+
+//        if (indexOfChild == same) {
+//            return true;
+//        }
+//        else {
+//            return false;
+//        }
     }
 
     private EMCTSsol initializeChildFromParent(EMCTSsol parent) {
@@ -93,17 +156,6 @@ public class EvoOperations implements EvoPlayable {
             }
         }
         return safeRandomActions.indexOf(bestAction);
-    }
-
-    private double evaluateOurWay(Solution solution) {
-        EMCTSsol child = (EMCTSsol) solution;
-        double update_value = 0.0;
-        GameState stateObsCopy = this.gameState.copy();
-
-
-
-
-        return update_value;
     }
 
     private int evaluateRollout(double[] values, GameState copy, int length, Solution sol) {
@@ -226,6 +278,7 @@ public class EvoOperations implements EvoPlayable {
             this.paramsHelper.setUpSuitableHeuristic(this.paramsHelper.getIntValue("heuristic_method"));
             this.mutationClass = new Mutate(this.paramsHelper, this.randomGenerator);
             this.paramsHelper.initializeBudgets();
+            this.mutationClass = new Mutate(this.paramsHelper, this.randomGenerator);
         }
     }
 

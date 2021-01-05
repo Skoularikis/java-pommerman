@@ -13,6 +13,7 @@ import players.mcts.MCTSParams;
 import players.mcts.SingleTreeNode;
 import players.optimisers.ParameterSet;
 import players.rhea.evo.Individual;
+import utils.ElapsedCpuTimer;
 import utils.Types;
 import utils.Utils;
 
@@ -72,30 +73,48 @@ public class Emcts implements GamePlayable {
             this.currentRootStateSolution.setPopulation(sol.getPopulation());
             this.currentRootStateSolution = (EMCTSsol) this.evoOperations.shift_buffer(this.currentRootStateSolution);
         }
-//        ArrayList<Individual> individuals = new ArrayList<>();
-//        for (int i=0; i<6; i++) {
-//            EMCTSsol s = (EMCTSsol)this.evoOperations.mutate(this.currentRootStateSolution);
-//            individuals.add(s.getPopulation());
-//        }
-//        System.out.println(individuals);
     }
 
     @Override
     public void getActionToExecute() {
         boolean stop = false;
+
+        double avgTimeTaken;
+        double acumTimeTaken = 0;
+        long remaining;
         int numIters = 0;
+
+        int remainingLimit = 5;
+
         while (!stop) {
             EMCTSsol curSol = this.currentRootStateSolution.copy();
+            ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
             EMCTSsol selected = (EMCTSsol)mctsOperations.treePolicy(curSol);
             double evalValue = evoOperations.evaluate(selected);
             this.mctsOperations.backUp(selected, evalValue);
             this.currentRootStateSolution.increaseVisitedCount();
-            if (numIters == 200) {
+            if (numIters == 150) {
                 stop = true;
             }
             else{
                 numIters++;
             }
+
+            //Stopping condition
+//            if(params.stop_type == params.STOP_TIME) {
+//                numIters++;
+//                acumTimeTaken += (elapsedTimerIteration.elapsedMillis()) ;
+//                avgTimeTaken  = acumTimeTaken/numIters;
+//                remaining = elapsedTimer.remainingTimeMillis();
+//                stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
+//            }else if(params.stop_type == params.STOP_ITERATIONS) {
+//                numIters++;
+//                stop = numIters >= params.num_iterations;
+//            }else if(params.stop_type == params.STOP_FMCALLS)
+//            {
+//                fmCallsCount+=params.rollout_depth;
+//                stop = (fmCallsCount + params.rollout_depth) > params.num_fmcalls;
+//            }
         }
     }
 

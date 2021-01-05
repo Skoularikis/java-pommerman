@@ -11,7 +11,7 @@ public class RHEAParams implements ParameterSet {
 
     // EA structure modules settings
     public int genetic_operator = MUTATION_AND_CROSSOVER;
-    public int mutation_type = MUTATION_UNIFORM;
+    public int mutation_type = MUTATION_BIT;
     public int selection_type = SELECT_TOURNAMENT;
     public int crossover_type = CROSS_ONE_POINT;
     public int init_type = INIT_RANDOM;
