@@ -37,14 +37,6 @@ public class MctsOperations implements MctsPlayable {
             if (!notFullyExpanded(cur)) {
                 return this.evoOperations.mutate(cur);
             } else {
-//                cur.getChildren().removeIf(child->(child.getPopulation().get_value()<-0.1));
-//                ArrayList<EMCTSsol> newChildren = new ArrayList<EMCTSsol>();
-//                for (EMCTSsol child : cur.getChildren()) {
-//                    if (child.getPopulation().get_value()>=0) {
-//                        newChildren.add(child);
-//                    }
-//                }
-//                cur.setChildren(newChildren);
                 cur = (EMCTSsol)uct(cur);
             }
         }

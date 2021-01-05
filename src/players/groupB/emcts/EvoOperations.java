@@ -90,6 +90,8 @@ public class EvoOperations implements EvoPlayable {
         return child;
     }
 
+
+
     @Override
     public Solution shift_buffer(Solution solution) {
         EMCTSsol sol = (EMCTSsol) solution;

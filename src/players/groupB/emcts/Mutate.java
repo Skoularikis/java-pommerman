@@ -99,7 +99,7 @@ public class Mutate {
      * Changes given gene to new random value in range [0, max_value). New gene will NOT be the same as current.
      * @param idx - index of gene to mutate
      */
-    public void mutateGeneToNewValue(Individual ind, int idx) {
+    public Individual mutateGeneToNewValue(Individual ind, int idx) {
         int max_actions = ind.get_max_actions();
 
         for (int j = 0; j < gene_size; j++) {
@@ -113,6 +113,7 @@ public class Mutate {
             }
             ind.get_actions()[idx + j] = idxList[random.nextInt(idxList.length)];
         }
+        return ind;
     }
 
 
