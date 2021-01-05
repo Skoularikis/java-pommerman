@@ -84,7 +84,9 @@ public class Emcts implements GamePlayable {
             double evalValue = evoOperations.evaluate(selected);
             this.mctsOperations.backUp(selected, evalValue);
             this.currentRootStateSolution.increaseVisitedCount();
-
+            if (this.mctsOperations.notFullyExpanded(curSol)) {
+                curSol.getChildren().removeIf(child -> (child.getPopulation().get_value() < 0.1));
+            }
             if(this.paramsHelper.getIntValue("budget_type") == Const.BudgetType.TIME_BUDGET) {
                 numIters++;
                 acumTimeTaken += (elapsedTimerIteration.elapsedMillis()) ;

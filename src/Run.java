@@ -99,7 +99,7 @@ public class Run {
                         emctsParams.setParameterValue("heuristic_method", Const.Heuristics.CUSTOM_HEURISTIC);
                         emctsParams.setParameterValue("mutation_rate", 0.5);
                         emctsParams.setParameterValue("rollout_depth", 12);
-                        emctsParams.setParameterValue("evaluate_update", Const.Evaluation.EVALUATE_UPDATE_AVERAGE);
+                        emctsParams.setParameterValue("evaluate_update", Const.Evaluation.EVALUATE_UPDATE_RAW);
                         p = new EMCTSPlayer(seed, playerID++, emctsParams);
                         playerStr[i-4] = "EMCTS";
 //                        p = new DoNothingPlayer(playerID++);
