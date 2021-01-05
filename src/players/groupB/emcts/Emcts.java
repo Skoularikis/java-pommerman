@@ -13,6 +13,7 @@ import players.mcts.MCTSParams;
 import players.mcts.SingleTreeNode;
 import players.optimisers.ParameterSet;
 import players.rhea.evo.Individual;
+import utils.ElapsedCpuTimer;
 import utils.Types;
 import utils.Utils;
 
@@ -64,23 +65,39 @@ public class Emcts implements GamePlayable {
             this.currentRootStateSolution = (EMCTSsol) this.evoOperations.shift_buffer(this.currentRootStateSolution);
 //            System.out.println(this.currentRootStateSolution);
         }
+
     }
 
     @Override
     public void getActionToExecute() {
-        boolean stop = false;
+        double avgTimeTaken;
+        double acumTimeTaken = 0;
+        long remaining;
         int numIters = 0;
+
+        int remainingLimit = 5;
+        boolean stop = false;
         while (!stop) {
             EMCTSsol curSol = this.currentRootStateSolution.copy();
+            ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
             EMCTSsol selected = (EMCTSsol)mctsOperations.treePolicy(curSol);
             double evalValue = evoOperations.evaluate(selected);
             this.mctsOperations.backUp(selected, evalValue);
             this.currentRootStateSolution.increaseVisitedCount();
-            if (numIters == 200) {
-                stop = true;
-            }
-            else{
+
+            if(this.paramsHelper.getIntValue("budget_type") == Const.BudgetType.TIME_BUDGET) {
                 numIters++;
+                acumTimeTaken += (elapsedTimerIteration.elapsedMillis()) ;
+                avgTimeTaken  = acumTimeTaken/numIters;
+                remaining = this.paramsHelper.getElapsedTimer().remainingTimeMillis();
+                stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
+            }else if(this.paramsHelper.getIntValue("budget_type") == Const.BudgetType.ITERATION_BUDGET) {
+                numIters++;
+                stop = numIters >= this.paramsHelper.getIntValue("iteration_budget");
+            }else if(this.paramsHelper.getIntValue("budget_type") == Const.BudgetType.FM_BUDGET)
+            {
+                this.paramsHelper.getFmBudget().use(this.paramsHelper.getIntValue("rollout_depth"));
+                stop = this.paramsHelper.getFmBudget().enoughBudgetIteration();
             }
         }
     }
@@ -179,6 +196,27 @@ public class Emcts implements GamePlayable {
         }
         return rootSolution;
     }
-    
+
+    public void createRootSolutionWithMCTS() {
+        MCTSParams mctsParams = new MCTSParams();
+        mctsParams.stop_type = mctsParams.STOP_ITERATIONS;
+        mctsParams.num_iterations = 200;
+        mctsParams.rollout_depth = 12;
+
+        mctsParams.heuristic_method = mctsParams.CUSTOM_HEURISTIC;
+//        SingleTreeNode m_root = new SingleTreeNode(mctsParams, this.randomGenerator, getAvailableActions().size(), getAvailableActionsInArray());
+//        m_root.setRootGameState(gs);
+//
+//        //Determine the action using MCTS...
+//        m_root.mctsSearch(ect);
+//
+//        //Determine the best action to take and return it.
+//        int action = m_root.mostVisitedAction();
+//
+//        // TODO update message memory
+//
+//        //... and return it.
+//        return actions[action];
+    }
 }
 

@@ -23,7 +23,7 @@ public class EMCTSParams implements ParameterSet {
     private int genetic_operator = Const.GeneticOperators.MUTATION_ONLY;
     private int mutation_type = Const.GeneticOperators.MUTATION_BIAS;
     //Evaluate
-    private int evaluate_update = Const.Evaluation.EVALUATE_UPDATE_AVERAGE;
+    private int evaluate_update = Const.Evaluation.EVALUATE_UPDATE_RAW;
     private int evaluate_act = Const.Evaluation.EVALUATE_ACT_LAST;
     //Rollout depth
     private int rollout_depth = 8;

@@ -63,7 +63,6 @@ public class ActionsHelper {
 
             if (x < 0 || y < 0) {
                 actionsToTry.remove(nAction);
-
             }
             if (x >= 0 && x < width && y >= 0 && y < height)
                 if(board[y][x] == Types.TILETYPE.FLAMES) {

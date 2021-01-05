@@ -1,6 +1,5 @@
 package players.groupB.emcts;
 
-import core.Game;
 import core.GameState;
 import players.groupB.helpers.ParamsHelper;
 import players.groupB.interfaces.EvoPlayable;
@@ -33,8 +32,62 @@ public class EvoOperations implements EvoPlayable {
     private MctsPlayable mctsOperations;
 
     public EvoOperations(Random randomGenerator) {
-
         this.randomGenerator = randomGenerator;
+    }
+    @Override
+    public Solution mutate(Solution ch){
+        EMCTSsol parent = (EMCTSsol)ch;
+        EMCTSsol child = initializeChildFromParent(parent);
+        int indexOfTheChild = parent.getChildren().indexOf(child);
+        GameState gameState = this.gameState.copy();
+        int indexOfGenomeToChange = this.randomGenerator.nextInt(parent.getPopulation().get_length());
+        int depth = 0;
+        while (!this.mctsOperations.finishRollout(gameState,depth)) {
+            int action = child.getPopulation().get_action(depth);
+            if (depth >= indexOfGenomeToChange) {
+                ArrayList<Types.ACTIONS> safeRandomActions = getSafeRandomActions(gameState, this.randomGenerator);
+                if (depth == indexOfGenomeToChange) {
+                    //mutate one action to random action
+                    int mutatedAction = safeRandomAction(gameState,this.randomGenerator);
+                    boolean flag = false;
+                    while (!flag) {
+                        if (action != mutatedAction) {
+                            action = mutatedAction;
+                            flag = true;
+                        }
+                        else{
+                            mutatedAction = safeRandomAction(gameState,this.randomGenerator);
+                        }
+                    }
+                    child.getPopulation().set_action(indexOfGenomeToChange, action);
+                }
+                else{
+                    //Greedily find the best action to repair
+                    if (!safeRandomActions.contains(getAvailableActionsInArrayList().get(action))){
+                        double maxQ = Double.NEGATIVE_INFINITY;
+                        Types.ACTIONS actionToRepair = null;
+                        GameState bestGameState = null;
+                        for (Types.ACTIONS act : safeRandomActions) {
+                            GameState gsCopy = gameState.copy();
+                            this.mctsOperations.roll(gsCopy, act);
+                            double valState = paramsHelper.getStateHeuristic().evaluateState(gsCopy);
+                            double Q = Utils.noise(valState, Const.epsilon, this.randomGenerator.nextDouble());
+                            if (Q > maxQ) {
+                                maxQ = Q;
+                                actionToRepair = act;
+                                bestGameState = gsCopy;
+                            }
+                        }
+                        gameState = bestGameState;
+                        action = getAvailableActionsInArrayList().indexOf(actionToRepair);
+                        child.getPopulation().set_action(depth, action);
+                    }
+                }
+            }
+            this.mctsOperations.roll(gameState, getAvailableActionsInArrayList().get(action));
+            depth++;
+        }
+        return child;
     }
 
     @Override
@@ -47,115 +100,12 @@ public class EvoOperations implements EvoPlayable {
         return sol;
     }
 
-//    @Override
-    public Solution mutation(Solution ch){
-        EMCTSsol parent = (EMCTSsol)ch;
-        EMCTSsol child = initializeChildFromParent(parent);
-        GameState gameState = this.gameState.copy();
-        // Use Mutation Class
-
-        //
-        int indexOfGenomeToChange = this.randomGenerator.nextInt(parent.getPopulation().get_length());
-        int depth = 0;
-        while (!this.mctsOperations.finishRollout(gameState,depth)) {
-            int action = child.getPopulation().get_action(depth);
-//            this.mutationClass.findGenesToMutate();
-//            int[] mutateArray = this.mutationClass.getGenesToMutate().toArray();
-//            this.mutationClass.mutateGeneToNewValue(child.getPopulation(), mutateArray[0]);
-            if (depth == indexOfGenomeToChange) {
-                action = getDifferentRandomAction(gameState, this.randomGenerator, action);
-
-//                action = getDifferentBestAction(gameState, action);
-                child.getPopulation().set_action(indexOfGenomeToChange, action);
-            }
-            //Repair Policy
-            if (depth > indexOfGenomeToChange) {
-                action = this.mctsOperations.repairPolicy(gameState, action);
-            }
-            this.mctsOperations.roll(gameState, getAvailableActionsInArrayList().get(action));
-            depth++;
-        }
-        return child;
-    }
-
-    @Override
-    public Solution mutate(Solution ch) {
-
-        EMCTSsol parent = (EMCTSsol)ch;
-        EMCTSsol child = initializeChildFromParent(parent);
-        GameState gameState = this.gameState.copy();
-        int indexOfChild = parent.getChildren().indexOf(child);
-        int depth = 0;
-        this.mutationClass.findGenesToMutate();
-        int[] mutateArray = this.mutationClass.getGenesToMutate().toArray();
-        while (!this.mctsOperations.finishRollout(gameState,depth)) {
-
-            if (depth == mutateArray[0]) {
-                child.getPopulation().set_action(depth,getDifferentRandomAction(gameState, this.randomGenerator, child.getPopulation().get_action(depth)));
-            }
-            if (depth > mutateArray[0]) {
-                child.getPopulation().set_action(depth,this.mctsOperations.repairPolicy(gameState, child.getPopulation().get_action(depth)));
-            }
-            this.mctsOperations.roll(gameState, getAvailableActionsInArrayList().get(child.getPopulation().get_action(depth)));
-            depth++;
-
-        }
-        for (int i = 0; i<parent.getChildren().size(); i++) {
-            EMCTSsol otherchild = parent.getChildren().get(i);
-            if (indexOfChild != i && Arrays.equals(child.getPopulation().get_actions(), otherchild.getPopulation().get_actions())) {
-                parent.getChildren().remove(child);
-                return mutate(parent);
-            }
-        }
-        return child;
-    }
-
-    private boolean checkifChildrenAreDifferent(EMCTSsol parent, int indexOfChild) {
-        if (parent.getChildren().size()>1){
-            EMCTSsol childTested = parent.getChildren().get(indexOfChild);
-            for (int i = 0; i<parent.getChildren().size(); i++) {
-                EMCTSsol child = parent.getChildren().get(i);
-                if (indexOfChild != i && Arrays.equals(child.getPopulation().get_actions(), childTested.getPopulation().get_actions())) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        else {
-            return false;
-        }
-
-//        if (indexOfChild == same) {
-//            return true;
-//        }
-//        else {
-//            return false;
-//        }
-    }
-
     private EMCTSsol initializeChildFromParent(EMCTSsol parent) {
         EMCTSsol child = new EMCTSsol();
         child.setPopulation(parent.getPopulation().copy());
         child.setParent(parent);
         parent.getChildren().add(child);
         return child;
-    }
-
-    private int getDifferentBestAction(GameState gameState, int action) {
-        double maxQ = Double.NEGATIVE_INFINITY;
-        ArrayList<Types.ACTIONS> safeRandomActions = getSafeRandomActions(gameState, this.randomGenerator);
-        Types.ACTIONS bestAction = null;
-        for (Types.ACTIONS act : safeRandomActions) {
-            GameState gsCopy = gameState.copy();
-            this.mctsOperations.roll(gsCopy, act);
-            double valState = paramsHelper.getStateHeuristic().evaluateState(gsCopy);
-            double Q = Utils.noise(valState, Const.epsilon, this.randomGenerator.nextDouble());
-            if (Q > maxQ) {
-                maxQ = Q;
-                bestAction = act;
-            }
-        }
-        return safeRandomActions.indexOf(bestAction);
     }
 
     private int evaluateRollout(double[] values, GameState copy, int length, Solution sol) {
@@ -168,16 +118,21 @@ public class EvoOperations implements EvoPlayable {
         for (int i = 0; i < length; i++) {
             // Stop if the state reached is terminal
             if (!copy.isTerminal()) {
-                this.mctsOperations.roll(copy, getAvailableActionsInArrayList().get(child.getPopulation().get_action(i)));
+                if (child.getPopulation() != null) {
+                    // Advance the state with the action in the individual
+                    this.mctsOperations.roll(copy, getAvailableActionsInArrayList().get(child.getPopulation().get_action(i)));
+
+                }
+
                 // Signal we used 1 FM call
                 this.paramsHelper.getFmBudget().use();
 
                 // Save the value of this state in the values array and update lastIdx reached.
-                if ((this.paramsHelper.getIntValue("evaluate_act") == Const.Evaluation.EVALUATE_ACT_DELTA || this.paramsHelper.getIntValue("evaluate_act") == Const.Evaluation.EVALUATE_ACT_LAST)
+                if ((this.paramsHelper.getIntValue("evaluate_act") == EVALUATE_ACT_DELTA || this.paramsHelper.getIntValue("evaluate_act") == EVALUATE_ACT_LAST)
                         && (i != length - 1)) {  // This only needs last state evaluated, speed up execution
                     values[i + 1] = 0;
                 } else {  // In all other cases we need all intermediate state values.
-                    values[i+1] = this.paramsHelper.getStateHeuristic().evaluateState(copy);
+                    values[i + 1] = this.paramsHelper.getStateHeuristic().evaluateState(copy);
                 }
                 lastIdx = i;
             } else {
@@ -200,7 +155,7 @@ public class EvoOperations implements EvoPlayable {
 
         double[] values = new double[child.getPopulation().get_length() + 1];
         GameState stateObsCopy = this.gameState.copy();
-        if (this.paramsHelper.getIntValue("evaluate_act") == Const.Evaluation.EVALUATE_ACT_LAST) {  // This doesn't need first state value
+        if (this.paramsHelper.getIntValue("evaluate_act") == EVALUATE_ACT_LAST) {  // This doesn't need first state value
             values[0] = 0;
         } else {
             values[0] = this.paramsHelper.getStateHeuristic().evaluateState(stateObsCopy);  // Evaluate current state
@@ -219,14 +174,14 @@ public class EvoOperations implements EvoPlayable {
 
         // Update value according to update rule
         double update_value;
-        int evaluate_update = this.paramsHelper.getIntValue("evaluate_update");
-        switch(evaluate_update) {
-            case Const.Evaluation.EVALUATE_UPDATE_DELTA: update_value = child.getPopulation().get_value() - state_value; break;
-            case Const.Evaluation.EVALUATE_UPDATE_AVERAGE: update_value = (child.getPopulation().get_value() + state_value) / 2; break;
-            case Const.Evaluation.EVALUATE_UPDATE_MIN: update_value = Math.min(child.getPopulation().get_value(), state_value); break;
-            case Const.Evaluation.EVALUATE_UPDATE_MAX: update_value = Math.max(child.getPopulation().get_value(), state_value); break;
+
+        switch(this.paramsHelper.getIntValue("evaluate_update")) {
+            case EVALUATE_UPDATE_DELTA: update_value = child.getPopulation().get_value() - state_value; break;
+            case EVALUATE_UPDATE_AVERAGE: update_value = (child.getPopulation().get_value() + state_value) / 2; break;
+            case EVALUATE_UPDATE_MIN: update_value = Math.min(child.getPopulation().get_value(), state_value); break;
+            case EVALUATE_UPDATE_MAX: update_value = Math.max(child.getPopulation().get_value(), state_value); break;
             default:
-            case Const.Evaluation.EVALUATE_UPDATE_RAW: update_value = state_value;
+            case EVALUATE_UPDATE_RAW: update_value = state_value;
         }
 
         // Set the individual's value and return it
@@ -278,7 +233,6 @@ public class EvoOperations implements EvoPlayable {
             this.paramsHelper.setUpSuitableHeuristic(this.paramsHelper.getIntValue("heuristic_method"));
             this.mutationClass = new Mutate(this.paramsHelper, this.randomGenerator);
             this.paramsHelper.initializeBudgets();
-            this.mutationClass = new Mutate(this.paramsHelper, this.randomGenerator);
         }
     }
 
