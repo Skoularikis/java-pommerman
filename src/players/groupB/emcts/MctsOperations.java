@@ -11,9 +11,11 @@ import players.optimisers.ParameterSet;
 import utils.Types;
 import utils.Utils;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import static players.groupB.helpers.ActionsHelper.getAvailableActionsInArrayList;
+import static players.groupB.helpers.ActionsHelper.getSafeRandomActions;
 
 public class MctsOperations implements MctsPlayable {
     private ParamsHelper paramsHelper;
@@ -94,7 +96,7 @@ public class MctsOperations implements MctsPlayable {
         //Simple, all random first, then my position.
         int nPlayers = 4;
         Types.ACTIONS[] actionsAll = new Types.ACTIONS[4];
-        int playerId = gs.getPlayerId() - Types.TILETYPE.AGENT0.getKey();
+        int playerId = this.paramsHelper.getIntValue("playerID");
         for(int i = 0; i < nPlayers; ++i)
         {
             if(i == playerId)
@@ -148,8 +150,7 @@ public class MctsOperations implements MctsPlayable {
         return false;
     }
 
-    //Setters
-
+    //Helpers
     @Override
     public void setEvoPlayable(EvoPlayable evoPlayable) {
         this.evoOperations = evoPlayable;
@@ -164,5 +165,27 @@ public class MctsOperations implements MctsPlayable {
             this.paramsHelper.initializeBudgets();
 
         }
+    }
+    //Repair Policy
+    @Override
+    public int repairPolicy(GameState gameState, int action) {
+        ArrayList<Types.ACTIONS> safeRandomActions = getSafeRandomActions(gameState, this.randomGenerator);
+        if (!safeRandomActions.contains(getAvailableActionsInArrayList().get(action))) { // Illegal action
+            double maxQ = Double.NEGATIVE_INFINITY;
+            Types.ACTIONS actionToRepair = null;
+            for (Types.ACTIONS act : safeRandomActions) {
+                GameState gsCopy = gameState.copy();
+                roll(gsCopy, act);
+                double valState = paramsHelper.getStateHeuristic().evaluateState(gsCopy);
+                double Q = Utils.noise(valState, Const.epsilon, this.randomGenerator.nextDouble());
+                if (Q > maxQ) {
+                    maxQ = Q;
+                    actionToRepair = act;
+                }
+            }
+            action = getAvailableActionsInArrayList().indexOf(actionToRepair);
+            return action;
+        }
+        return action;
     }
 }

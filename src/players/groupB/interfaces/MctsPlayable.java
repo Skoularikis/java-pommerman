@@ -24,4 +24,7 @@ public interface MctsPlayable {
     void setEvoPlayable(EvoPlayable evoPlayable);
     void setParamsHelper(GameState gameState, ParameterSet params);
 
+    //Repair Policy
+    int repairPolicy(GameState gameState, int action);
+
 }

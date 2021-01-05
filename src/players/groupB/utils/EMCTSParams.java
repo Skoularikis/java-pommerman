@@ -52,10 +52,13 @@ public class EMCTSParams implements ParameterSet {
         switch(name) {
             case "time_budget":
                 time_budget = (int)value;
+                break;
             case "rollout_depth":
                 rollout_depth = (int)value;
+                break;
             case "evaluate_update":
                 evaluate_update = (int)value;
+                break;
             case "genetic_operator":
                 genetic_operator = (int) value;
                 break;

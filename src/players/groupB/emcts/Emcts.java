@@ -16,6 +16,7 @@ import players.rhea.evo.Individual;
 import utils.Types;
 import utils.Utils;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import static players.groupB.helpers.ActionsHelper.*;
@@ -53,7 +54,15 @@ public class Emcts implements GamePlayable {
         this.mctsOperations.setParamsHelper(gameState,this.params);
         this.evoOperations.setParamsHelper(gameState,this.params);
         this.paramsHelper = evoOperations.getParamsHelper();
+
         if (currentRootState == null) { // Root of the tree
+//            EMCTSsol s = null;
+//            double value = -1;
+//            while (value <= 0) {
+//                s = createRootStateSolutionWithGreedyAction(this.paramsHelper);
+//                value = this.evoOperations.evaluate(s);
+//            }
+//            this.currentRootStateSolution = s;
             this.currentRootStateSolution = createRootStateSolutionWithGreedyAction(this.paramsHelper);
         }
         else { // Leaf node
@@ -62,7 +71,6 @@ public class Emcts implements GamePlayable {
             this.currentRootStateSolution = new EMCTSsol();
             this.currentRootStateSolution.setPopulation(sol.getPopulation());
             this.currentRootStateSolution = (EMCTSsol) this.evoOperations.shift_buffer(this.currentRootStateSolution);
-//            System.out.println(this.currentRootStateSolution);
         }
 //        ArrayList<Individual> individuals = new ArrayList<>();
 //        for (int i=0; i<6; i++) {
@@ -163,10 +171,9 @@ public class Emcts implements GamePlayable {
                         getAvailableActions().size()));
         int depth = 0;
         GameState gameState = this.rootGameState.copy();
-        while (!this.mctsOperations.finishRollout(this.rootGameState, depth)) {
+        while (!this.mctsOperations.finishRollout(gameState, depth)) {
             double maxQ = Double.NEGATIVE_INFINITY;
             Types.ACTIONS bestAction = null;
-            GameState currentBestGameSate = null;
             for (Types.ACTIONS act : getSafeRandomActions(gameState,this.randomGenerator)) {
                 GameState gsCopy = gameState.copy();
                 this.mctsOperations.roll(gsCopy, act);
@@ -176,36 +183,15 @@ public class Emcts implements GamePlayable {
                 if (Q > maxQ) {
                     maxQ = Q;
                     bestAction = act;
-                    currentBestGameSate = gsCopy;
                 }
             }
-            rootSolution.getPopulation().set_action(depth, getAvailableActionsInArrayList().indexOf(bestAction));
+            int action = getAvailableActionsInArrayList().indexOf(bestAction);
+            rootSolution.getPopulation().set_action(depth, action);
             depth++;
-            gameState = currentBestGameSate;
+            this.mctsOperations.roll(gameState,bestAction);
         }
         return rootSolution;
     }
 
-    public void createRootSolutionWithMCTS() {
-        MCTSParams mctsParams = new MCTSParams();
-        mctsParams.stop_type = mctsParams.STOP_ITERATIONS;
-        mctsParams.num_iterations = 200;
-        mctsParams.rollout_depth = 12;
-
-        mctsParams.heuristic_method = mctsParams.CUSTOM_HEURISTIC;
-//        SingleTreeNode m_root = new SingleTreeNode(mctsParams, this.randomGenerator, getAvailableActions().size(), getAvailableActionsInArray());
-//        m_root.setRootGameState(gs);
-//
-//        //Determine the action using MCTS...
-//        m_root.mctsSearch(ect);
-//
-//        //Determine the best action to take and return it.
-//        int action = m_root.mostVisitedAction();
-//
-//        // TODO update message memory
-//
-//        //... and return it.
-//        return actions[action];
-    }
 }
 

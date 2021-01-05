@@ -1,5 +1,6 @@
 package players.groupB.helpers;
 import core.GameState;
+import players.groupB.interfaces.MctsPlayable;
 import players.rhea.evo.Individual;
 import utils.Types;
 import utils.Vector2d;
@@ -60,7 +61,7 @@ public class ActionsHelper {
             int x = pos.x + dir.x;
             int y = pos.y + dir.y;
 
-            if (x < 0 || y < 0  || x > width || y > height) {
+            if (x < 0 || y < 0) {
                 actionsToTry.remove(nAction);
 
             }
@@ -98,5 +99,21 @@ public class ActionsHelper {
         //Uh oh...
         return randomGenerator.nextInt(getAvailableActionsInArrayList().size());
     }
+
+    public static int getDifferentRandomAction(GameState gameState, Random randomGenerator, int action) {
+        int mutatedAction = safeRandomAction(gameState,randomGenerator);
+        boolean flag = false;
+        while (!flag) {
+            if (action != mutatedAction) {
+                action = mutatedAction;
+                flag = true;
+            }
+            else{
+                mutatedAction = safeRandomAction(gameState,randomGenerator);
+            }
+        }
+        return action;
+    }
+
 
 }
